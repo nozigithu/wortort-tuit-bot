@@ -1,6 +1,5 @@
 import json
 import os
-import random
 from telegram import Update, BotCommand
 from telegram.ext import (
     ApplicationBuilder,
@@ -10,176 +9,139 @@ from telegram.ext import (
     filters,
 )
 
-TOKEN = "8753301957:AAFpx6qa7DoNItH80kxboa8rnVByCnithe0"
+TOKEN = os.getenv("TOKEN", "8753301957:AAFpx6qa7DoNItH80kxboa8rnVByCnithe0")
 ADMIN_ID = 6051699852
 DATA_FILE = "users.json"
-LOGO_FILE = "logo.png"
 
-QUIZZES = [
-    {
-        "question": "Was ist der richtige bestimmte Artikel für „Buch“?",
-        "options": {"a": "der", "b": "die", "c": "das"},
-        "correct": "c",
-        "explanation": "Richtig ist: das Buch."
-    },
-    {
-        "question": "Was ist der richtige bestimmte Artikel für „Tisch“?",
-        "options": {"a": "der", "b": "die", "c": "das"},
-        "correct": "a",
-        "explanation": "Richtig ist: der Tisch."
-    },
-    {
-        "question": "Was ist der richtige bestimmte Artikel für „Lampe“?",
-        "options": {"a": "der", "b": "die", "c": "das"},
-        "correct": "b",
-        "explanation": "Richtig ist: die Lampe."
-    },
-    {
-        "question": "Wie lautet der Plural von „das Buch“?",
-        "options": {"a": "die Buchs", "b": "die Bücher", "c": "die Buche"},
-        "correct": "b",
-        "explanation": "Der Plural ist: die Bücher."
-    },
-    {
-        "question": "Wie lautet der Plural von „der Student“?",
-        "options": {"a": "die Studenten", "b": "die Studenteninnen", "c": "die Studente"},
-        "correct": "a",
-        "explanation": "Der Plural ist: die Studenten."
-    },
-    {
-        "question": "Welche Form ist richtig: Ich ___ aus Usbekistan.",
-        "options": {"a": "kommt", "b": "komme", "c": "kommen"},
-        "correct": "b",
-        "explanation": "Richtig ist: Ich komme aus Usbekistan."
-    },
-    {
-        "question": "Welche Form ist richtig: Er ___ Informatik.",
-        "options": {"a": "studierst", "b": "studiere", "c": "studiert"},
-        "correct": "c",
-        "explanation": "Richtig ist: Er studiert Informatik."
-    },
-    {
-        "question": "Welche Form ist richtig: Wir ___ Deutsch.",
-        "options": {"a": "lernen", "b": "lernt", "c": "lerne"},
-        "correct": "a",
-        "explanation": "Richtig ist: Wir lernen Deutsch."
-    },
-    {
-        "question": "Welches Wort passt? Ich lerne Deutsch ___ Python.",
-        "options": {"a": "und", "b": "oder", "c": "aber"},
-        "correct": "a",
-        "explanation": "Richtig ist: Ich lerne Deutsch und Python."
-    },
-    {
-        "question": "Welches Personalpronomen passt zu „Ali“?",
-        "options": {"a": "sie", "b": "es", "c": "er"},
-        "correct": "c",
-        "explanation": "Für Ali passt: er."
-    },
-    {
-        "question": "Welches Personalpronomen passt zu „Madina“?",
-        "options": {"a": "sie", "b": "er", "c": "es"},
-        "correct": "a",
-        "explanation": "Für Madina passt: sie."
-    },
-    {
-        "question": "Was ist richtig?",
-        "options": {
-            "a": "Ich bin Studentin.",
-            "b": "Ich ist Studentin.",
-            "c": "Ich sind Studentin."
-        },
-        "correct": "a",
-        "explanation": "Richtig ist: Ich bin Studentin."
-    },
-    {
-        "question": "Was ist richtig?",
-        "options": {
-            "a": "Das Auto ist neu.",
-            "b": "Die Auto ist neu.",
-            "c": "Der Auto ist neu."
-        },
-        "correct": "a",
-        "explanation": "Richtig ist: Das Auto ist neu."
-    },
-    {
-        "question": "Welches Wort ist ein Verb?",
-        "options": {"a": "lernen", "b": "Buch", "c": "Universität"},
-        "correct": "a",
-        "explanation": "„lernen“ ist ein Verb."
-    },
-    {
-        "question": "Welche Übersetzung ist richtig: „Schleife“?",
-        "options": {"a": "Variable", "b": "Loop", "c": "Funktion"},
-        "correct": "b",
-        "explanation": "„Schleife“ bedeutet: Loop."
-    },
-]
+THEORY_TEXT = (
+    "📘 Theorie: Geschlecht und Artikel im Deutschen\n\n"
+    "Im Deutschen gibt es drei grammatische Geschlechter:\n"
+    "• Maskulinum → der\n"
+    "• Femininum → die\n"
+    "• Neutrum → das\n\n"
+    "Beispiele:\n"
+    "• der Mann\n"
+    "• die Frau\n"
+    "• das Kind\n\n"
+    "Artikel sind wichtig, weil sie das Geschlecht des Nomens zeigen.\n\n"
+    "Unbestimmte Artikel:\n"
+    "• ein Mann\n"
+    "• eine Frau\n"
+    "• ein Kind\n\n"
+    "Im Plural steht immer der Artikel „die“:\n"
+    "• der Tisch → die Tische\n"
+    "• die Lampe → die Lampen\n"
+    "• das Buch → die Bücher\n\n"
+    "Merksatz:\n"
+    "Lerne jedes Nomen immer mit Artikel:\n"
+    "• das Buch\n"
+    "• der Tisch\n"
+    "• die Lampe"
+)
 
 MISSIONS = [
     {
         "id": 1,
-        "task": "Erstellen Sie eine Variable 'strom' und geben Sie ihr den Wert 50.",
-        "answers": ["strom=50"]
+        "task": (
+            "Mission 1 ✍️\n\n"
+            "Ergänzen Sie die richtigen bestimmten Artikel.\n\n"
+            "Wörter:\n"
+            "• Buch\n"
+            "• Tisch\n"
+            "• Lampe\n\n"
+            "Bitte senden Sie Ihre Antwort als normale Nachricht.\n"
+            "Beispiel:\n"
+            "das Buch, der Tisch, die Lampe"
+        ),
+        "answers": [
+            "dasbuch,dertisch,dielampe",
+            "dasbuch;dertisch;dielampe",
+            "dasbuchdertischtendielampe",
+        ],
+        "sample": "das Buch, der Tisch, die Lampe",
     },
     {
         "id": 2,
-        "task": "Erstellen Sie eine Variable 'zahl' und geben Sie ihr den Wert 100.",
-        "answers": ["zahl=100"]
-    },
-    {
-        "id": 3,
-        "task": "Erstellen Sie eine Variable 'name' und geben Sie ihr den Text 'Python'.",
-        "answers": ['name="python"', "name='python'"]
-    },
-    {
-        "id": 4,
-        "task": "Schreiben Sie einen Python-Befehl, der 'Hallo' ausgibt.",
-        "answers": ['print("hallo")', "print('hallo')"]
-    },
-    {
-        "id": 5,
-        "task": "Erstellen Sie eine Liste mit dem Namen 'zahlen' und den Werten 1, 2, 3.",
-        "answers": ["zahlen=[1,2,3]"]
-    },
-    {
-        "id": 6,
-        "task": "Erstellen Sie eine Variable 'aktiv' mit dem Wert True.",
-        "answers": ["aktiv=true"]
-    },
-    {
-        "id": 7,
-        "task": "Schreiben Sie eine Bedingung: Wenn x größer als 5 ist, soll 'groß' ausgegeben werden.",
+        "task": (
+            "Mission 2 ✍️\n\n"
+            "Schreiben Sie die Nomen mit richtigem Artikel.\n\n"
+            "Wörter:\n"
+            "• Mann\n"
+            "• Frau\n"
+            "• Kind\n\n"
+            "Bitte senden Sie Ihre Antwort als normale Nachricht.\n"
+            "Beispiel:\n"
+            "der Mann, die Frau, das Kind"
+        ),
         "answers": [
-            'ifx>5:print("groß")',
-            "ifx>5:print('groß')"
-        ]
+            "dermann,diefrau,daskind",
+            "dermann;diefrau;daskind",
+            "dermanndiefraudaskind",
+        ],
+        "sample": "der Mann, die Frau, das Kind",
+    },
+]
+
+QUIZZES = [
+    {
+        "question": "Was ist der richtige Artikel für „Buch“?",
+        "options": {"a": "der", "b": "die", "c": "das"},
+        "correct": "c",
+        "explanation": "Richtig ist: das Buch.",
     },
     {
-        "id": 8,
-        "task": "Schreiben Sie eine Schleife, die 3-mal 'Hallo' ausgibt.",
-        "answers": [
-            'foriinrange(3):print("hallo")',
-            "foriinrange(3):print('hallo')"
-        ]
+        "question": "Was ist der richtige Artikel für „Tisch“?",
+        "options": {"a": "der", "b": "die", "c": "das"},
+        "correct": "a",
+        "explanation": "Richtig ist: der Tisch.",
     },
     {
-        "id": 9,
-        "task": "Erstellen Sie eine Funktion mit dem Namen 'gruss', die 'Hallo' ausgibt.",
-        "answers": [
-            'defgruss():print("hallo")',
-            "defgruss():print('hallo')"
-        ]
+        "question": "Was ist der richtige Artikel für „Lampe“?",
+        "options": {"a": "der", "b": "die", "c": "das"},
+        "correct": "b",
+        "explanation": "Richtig ist: die Lampe.",
     },
     {
-        "id": 10,
-        "task": "Erstellen Sie ein Dictionary 'student' mit name='Ali' und alter=20.",
-        "answers": [
-            "student={'name':'ali','alter':20}",
-            'student={"name":"ali","alter":20}',
-            'student={"alter":20,"name":"ali"}',
-            "student={'alter':20,'name':'ali'}"
-        ]
+        "question": "Welcher Artikel ist feminin?",
+        "options": {"a": "der", "b": "die", "c": "das"},
+        "correct": "b",
+        "explanation": "Feminin ist: die.",
+    },
+    {
+        "question": "Welcher Artikel ist neutrum?",
+        "options": {"a": "das", "b": "der", "c": "die"},
+        "correct": "a",
+        "explanation": "Neutrum ist: das.",
+    },
+    {
+        "question": "Welcher Artikel ist maskulin?",
+        "options": {"a": "die", "b": "das", "c": "der"},
+        "correct": "c",
+        "explanation": "Maskulin ist: der.",
+    },
+    {
+        "question": "Was ist richtig?",
+        "options": {"a": "das Frau", "b": "die Frau", "c": "der Frau"},
+        "correct": "b",
+        "explanation": "Richtig ist: die Frau.",
+    },
+    {
+        "question": "Was ist richtig?",
+        "options": {"a": "das Kind", "b": "die Kind", "c": "der Kind"},
+        "correct": "a",
+        "explanation": "Richtig ist: das Kind.",
+    },
+    {
+        "question": "Welcher Artikel steht im Plural?",
+        "options": {"a": "der", "b": "die", "c": "das"},
+        "correct": "b",
+        "explanation": "Im Plural steht immer: die.",
+    },
+    {
+        "question": "Was ist richtig?",
+        "options": {"a": "der Buch", "b": "die Buch", "c": "das Buch"},
+        "correct": "c",
+        "explanation": "Richtig ist: das Buch.",
     },
 ]
 
@@ -200,118 +162,155 @@ def get_user(update: Update, data: dict):
     user_id = str(update.effective_user.id)
     if user_id not in data:
         data[user_id] = {
-            "name": update.effective_user.first_name,
+            "name": update.effective_user.first_name or "Student/in",
             "points": 0,
-            "quiz_answer": None,
-            "quiz_question": None,
             "current_mission": None,
+            "current_quiz": None,
+            "theory_read": False,
         }
     return user_id, data[user_id]
 
 
 def normalize_text(text: str) -> str:
-    return text.strip().replace(" ", "").replace("\n", "").lower()
+    return (
+        text.strip()
+        .replace(" ", "")
+        .replace("\n", "")
+        .replace("„", "")
+        .replace("“", "")
+        .lower()
+    )
 
 
 def get_level(points: int) -> str:
-    if points >= 150:
-        return "Python-Meister"
     if points >= 100:
+        return "Experte/Expertin"
+    if points >= 60:
         return "Fortgeschritten"
-    if points >= 50:
-        return "Junior-Lerner"
-    return "Anfänger"
+    if points >= 30:
+        return "Lerner/Lernerin"
+    return "Anfänger/Anfängerin"
+
 
 async def set_bot_commands(app):
     commands = [
         BotCommand("start", "Bot starten"),
+        BotCommand("theorie", "Theorie lesen"),
+        BotCommand("mission", "Eine Mission erhalten"),
+        BotCommand("quiz", "Ein Quiz erhalten"),
+        BotCommand("punkte", "Punkte anzeigen"),
+        BotCommand("niveau", "Niveau anzeigen"),
         BotCommand("hilfe", "Hilfe öffnen"),
-        BotCommand("aufgabe", "Eine Python-Aufgabe erhalten"),
-        BotCommand("quiz", "Ein Deutsch-Quiz erhalten"),
-        BotCommand("punkte", "Gesamtpunktzahl anzeigen"),
-        BotCommand("niveau", "Aktuelles Niveau anzeigen"),
     ]
     await app.bot.set_my_commands(commands)
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     user_id, user = get_user(update, data)
     save_data(data)
 
-    caption = (
-        f"Willkommen beim WortOrt–TUIT Lernbot, {user['name']}! 🇩🇪\n\n"
-        "Deutsch + Python lernen\n"
-        "Digitale Plattform für den Fernunterricht\n\n"
+    text = (
+        f"Willkommen, {user['name']}! 👋\n\n"
+        "Thema: Geschlecht und Artikel im Deutschen\n\n"
+        "Bitte arbeiten Sie in dieser Reihenfolge:\n"
+        "1. /theorie lesen\n"
+        "2. /mission bearbeiten\n"
+        "3. /quiz lösen\n\n"
         "Befehle:\n"
-        "/aufgabe – Python-Aufgabe\n"
-        "/quiz – Deutsch-Quiz\n"
-        "/punkte – Ihre Punkte\n"
-        "/niveau – Ihr Niveau\n"
+        "/theorie – Theorie lesen\n"
+        "/mission – Mission erhalten\n"
+        "/quiz – Quiz erhalten\n"
+        "/punkte – Punkte sehen\n"
+        "/niveau – Niveau sehen\n"
         "/hilfe – Hilfe"
     )
+    await update.message.reply_text(text)
 
-    if os.path.exists(LOGO_FILE):
-        with open(LOGO_FILE, "rb") as photo:
-            await context.bot.send_photo(
-                chat_id=update.effective_chat.id,
-                photo=photo,
-                caption=caption
-            )
-    else:
-        await update.message.reply_text(caption)
+
+async def theorie(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = load_data()
+    user_id, user = get_user(update, data)
+    user["theory_read"] = True
+    save_data(data)
+    await update.message.reply_text(THEORY_TEXT)
 
 
 async def hilfe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "Hilfebereich 🛠\n\n"
-        "Verfügbare Befehle:\n"
-        "/start – Bot starten\n"
-        "/aufgabe – eine Python-Aufgabe erhalten\n"
-        "/quiz – ein Deutsch-Quiz erhalten\n"
-        "/punkte – Ihre Gesamtpunktzahl sehen\n"
-        "/niveau – Ihr aktuelles Niveau sehen\n"
-        "/hilfe – Hilfefenster öffnen\n\n"
+        "So arbeiten Sie mit dem Bot:\n"
+        "1. Lesen Sie zuerst /theorie\n"
+        "2. Bearbeiten Sie dann /mission\n"
+        "3. Lösen Sie danach /quiz\n\n"
+        "Befehle:\n"
+        "/theorie\n"
+        "/mission\n"
+        "/quiz\n"
+        "/punkte\n"
+        "/niveau\n"
+        "/hilfe\n\n"
         "Quiz-Antworten:\n"
         "/a\n"
         "/b\n"
         "/c\n\n"
-        "Die Antwort auf eine Aufgabe soll als normale Nachricht gesendet werden."
+        "Die Antwort auf eine Mission senden Sie bitte als normale Nachricht."
     )
     await update.message.reply_text(text)
 
 
-async def aufgabe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def mission(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     user_id, user = get_user(update, data)
 
-    mission_obj = random.choice(MISSIONS)
-    user["current_mission"] = mission_obj["id"]
-    save_data(data)
+    if not user.get("theory_read"):
+        await update.message.reply_text(
+            "Bitte lesen Sie zuerst die Theorie mit /theorie."
+        )
+        return
 
-    text = (
-        f"Python-Aufgabe {mission_obj['id']} 💻\n\n"
-        f"{mission_obj['task']}\n\n"
-        "Bitte senden Sie Ihre Antwort als normale Nachricht."
-    )
-    await update.message.reply_text(text)
+    current = user.get("current_mission")
+    if current is None:
+        mission_obj = MISSIONS[0]
+        user["current_mission"] = mission_obj["id"]
+    elif current == 1:
+        mission_obj = MISSIONS[1]
+        user["current_mission"] = mission_obj["id"]
+    else:
+        mission_obj = MISSIONS[0]
+        user["current_mission"] = mission_obj["id"]
+
+    save_data(data)
+    await update.message.reply_text(mission_obj["task"])
 
 
 async def quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     user_id, user = get_user(update, data)
 
-    quiz_obj = random.choice(QUIZZES)
-    user["quiz_answer"] = quiz_obj["correct"]
-    user["quiz_question"] = quiz_obj["question"]
+    if not user.get("theory_read"):
+        await update.message.reply_text(
+            "Bitte lesen Sie zuerst die Theorie mit /theorie."
+        )
+        return
+
+    quiz_index = user.get("current_quiz")
+    if quiz_index is None:
+        quiz_index = 0
+    else:
+        quiz_index = (quiz_index + 1) % len(QUIZZES)
+
+    user["current_quiz"] = quiz_index
     save_data(data)
 
+    q = QUIZZES[quiz_index]
     text = (
-        "Deutsch-Quiz 🇩🇪\n\n"
-        f"{quiz_obj['question']}\n\n"
-        f"a) {quiz_obj['options']['a']}\n"
-        f"b) {quiz_obj['options']['b']}\n"
-        f"c) {quiz_obj['options']['c']}\n\n"
-        "Bitte senden Sie Ihre Antwort:\n"
+        f"Quiz {quiz_index + 1} 🧠\n\n"
+        f"{q['question']}\n\n"
+        f"a) {q['options']['a']}\n"
+        f"b) {q['options']['b']}\n"
+        f"c) {q['options']['c']}\n\n"
+        "Bitte antworten Sie mit:\n"
         "/a\n"
         "/b\n"
         "/c"
@@ -320,39 +319,34 @@ async def quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def answer_a(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await check_answer(update, context, "a")
+    await check_quiz_answer(update, context, "a")
 
 
 async def answer_b(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await check_answer(update, context, "b")
+    await check_quiz_answer(update, context, "b")
 
 
 async def answer_c(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await check_answer(update, context, "c")
+    await check_quiz_answer(update, context, "c")
 
 
-async def check_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, answer: str):
+async def check_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, answer: str):
     data = load_data()
     user_id, user = get_user(update, data)
 
-    correct_answer = user.get("quiz_answer")
-    quiz_question = user.get("quiz_question")
-
-    if correct_answer is None:
-        await update.message.reply_text("Bitte senden Sie zuerst /quiz.")
+    quiz_index = user.get("current_quiz")
+    if quiz_index is None:
+        await update.message.reply_text("Bitte starten Sie zuerst ein Quiz mit /quiz.")
         return
 
-    quiz_obj = None
-    for q in QUIZZES:
-        if q["question"] == quiz_question:
-            quiz_obj = q
-            break
+    q = QUIZZES[quiz_index]
 
-    if answer == correct_answer:
+    if answer == q["correct"]:
         user["points"] += 10
+        save_data(data)
 
         await update.message.reply_text(
-            f"Richtig! ✅\n{quiz_obj['explanation']}\nSie haben +10 Punkte bekommen."
+            f"Richtig! ✅\n{q['explanation']}\nSie haben +10 Punkte bekommen."
         )
 
         await context.bot.send_message(
@@ -361,7 +355,7 @@ async def check_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, answe
                 f"🧠 Quiz-Antwort\n\n"
                 f"Student/in: {user['name']}\n"
                 f"ID: {user_id}\n\n"
-                f"Frage: {quiz_question}\n"
+                f"Frage: {q['question']}\n"
                 f"Antwort: /{answer}\n"
                 f"Ergebnis: RICHTIG ✅\n"
                 f"Vergebene Punkte: +10\n"
@@ -369,8 +363,10 @@ async def check_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, answe
             )
         )
     else:
+        save_data(data)
+
         await update.message.reply_text(
-            f"Falsch ❌\n{quiz_obj['explanation']}\nVergebene Punkte: 0"
+            f"Falsch ❌\n{q['explanation']}\nVergebene Punkte: 0"
         )
 
         await context.bot.send_message(
@@ -379,7 +375,7 @@ async def check_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, answe
                 f"🧠 Quiz-Antwort\n\n"
                 f"Student/in: {user['name']}\n"
                 f"ID: {user_id}\n\n"
-                f"Frage: {quiz_question}\n"
+                f"Frage: {q['question']}\n"
                 f"Antwort: /{answer}\n"
                 f"Ergebnis: FALSCH ❌\n"
                 f"Vergebene Punkte: 0\n"
@@ -387,15 +383,10 @@ async def check_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, answe
             )
         )
 
-    user["quiz_answer"] = None
-    user["quiz_question"] = None
-    save_data(data)
-
 
 async def punkte(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     user_id, user = get_user(update, data)
-
     await update.message.reply_text(
         f"{user['name']}, Ihre Gesamtpunktzahl ist: {user['points']} 🏆"
     )
@@ -404,7 +395,6 @@ async def punkte(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def niveau(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     user_id, user = get_user(update, data)
-
     await update.message.reply_text(
         f"{user['name']}, Ihr aktuelles Niveau ist: {get_level(user['points'])}"
     )
@@ -418,8 +408,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id, user = get_user(update, data)
 
     current_mission_id = user.get("current_mission")
-    message_text = update.message.text
-
     if current_mission_id is None:
         return
 
@@ -432,6 +420,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if mission_obj is None:
         return
 
+    message_text = update.message.text
     normalized = normalize_text(message_text)
 
     if normalized in mission_obj["answers"]:
@@ -441,18 +430,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text(
             "Richtig! ✅\n"
-            "Die Aufgabe wurde erfolgreich gelöst.\n"
+            "Die Mission wurde erfolgreich gelöst.\n"
             "Sie haben +15 Punkte bekommen."
         )
 
         await context.bot.send_message(
             chat_id=ADMIN_ID,
             text=(
-                f"📩 Neue Antwort zur Aufgabe\n\n"
+                f"📩 Missions-Antwort\n\n"
                 f"Student/in: {user['name']}\n"
                 f"ID: {user_id}\n\n"
-                f"Aufgabe: {mission_obj['id']}\n"
-                f"Text der Aufgabe: {mission_obj['task']}\n"
+                f"Mission: {mission_obj['id']}\n"
+                f"Aufgabe: {mission_obj['task']}\n"
                 f"Antwort: {message_text}\n"
                 f"Ergebnis: RICHTIG ✅\n"
                 f"Vergebene Punkte: +15\n"
@@ -470,11 +459,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(
             chat_id=ADMIN_ID,
             text=(
-                f"📩 Neue Antwort zur Aufgabe\n\n"
+                f"📩 Missions-Antwort\n\n"
                 f"Student/in: {user['name']}\n"
                 f"ID: {user_id}\n\n"
-                f"Aufgabe: {mission_obj['id']}\n"
-                f"Text der Aufgabe: {mission_obj['task']}\n"
+                f"Mission: {mission_obj['id']}\n"
+                f"Aufgabe: {mission_obj['task']}\n"
                 f"Antwort: {message_text}\n"
                 f"Ergebnis: FALSCH ❌\n"
                 f"Vergebene Punkte: 0\n"
@@ -487,8 +476,9 @@ def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("theorie", theorie))
     app.add_handler(CommandHandler("hilfe", hilfe))
-    app.add_handler(CommandHandler("aufgabe", aufgabe))
+    app.add_handler(CommandHandler("mission", mission))
     app.add_handler(CommandHandler("quiz", quiz))
     app.add_handler(CommandHandler("punkte", punkte))
     app.add_handler(CommandHandler("niveau", niveau))
