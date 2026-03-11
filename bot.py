@@ -10,8 +10,10 @@ from telegram.ext import (
 )
 
 TOKEN = os.getenv("TOKEN", "8753301957:AAFpx6qa7DoNItH80kxboa8rnVByCnithe0")
+
 ADMIN_ID = 6051699852
 DATA_FILE = "users.json"
+LOGO_FILE = "logo.png"
 
 THEORY_TEXT = (
     "📘 Theorie: Geschlecht und Artikel im Deutschen\n\n"
@@ -23,7 +25,10 @@ THEORY_TEXT = (
     "• der Mann\n"
     "• die Frau\n"
     "• das Kind\n\n"
-    "Artikel sind wichtig, weil sie das Geschlecht des Nomens zeigen.\n\n"
+    "Bestimmte Artikel:\n"
+    "• der Tisch\n"
+    "• die Lampe\n"
+    "• das Buch\n\n"
     "Unbestimmte Artikel:\n"
     "• ein Mann\n"
     "• eine Frau\n"
@@ -33,10 +38,8 @@ THEORY_TEXT = (
     "• die Lampe → die Lampen\n"
     "• das Buch → die Bücher\n\n"
     "Merksatz:\n"
-    "Lerne jedes Nomen immer mit Artikel:\n"
-    "• das Buch\n"
-    "• der Tisch\n"
-    "• die Lampe"
+    "Lernen Sie jedes Nomen immer mit Artikel.\n\n"
+    "Wenn Sie fertig sind, senden Sie bitte /weiter."
 )
 
 MISSIONS = [
@@ -49,16 +52,13 @@ MISSIONS = [
             "• Buch\n"
             "• Tisch\n"
             "• Lampe\n\n"
-            "Bitte senden Sie Ihre Antwort als normale Nachricht.\n"
-            "Beispiel:\n"
-            "das Buch, der Tisch, die Lampe"
+            "Bitte senden Sie Ihre Antwort als normale Nachricht."
         ),
         "answers": [
             "dasbuch,dertisch,dielampe",
             "dasbuch;dertisch;dielampe",
-            "dasbuchdertischtendielampe",
+            "dasbuchdertischdielampe",
         ],
-        "sample": "das Buch, der Tisch, die Lampe",
     },
     {
         "id": 2,
@@ -69,16 +69,13 @@ MISSIONS = [
             "• Mann\n"
             "• Frau\n"
             "• Kind\n\n"
-            "Bitte senden Sie Ihre Antwort als normale Nachricht.\n"
-            "Beispiel:\n"
-            "der Mann, die Frau, das Kind"
+            "Bitte senden Sie Ihre Antwort als normale Nachricht."
         ),
         "answers": [
             "dermann,diefrau,daskind",
             "dermann;diefrau;daskind",
             "dermanndiefraudaskind",
         ],
-        "sample": "der Mann, die Frau, das Kind",
     },
 ]
 
@@ -164,9 +161,8 @@ def get_user(update: Update, data: dict):
         data[user_id] = {
             "name": update.effective_user.first_name or "Student/in",
             "points": 0,
-            "current_mission": None,
-            "current_quiz": None,
-            "theory_read": False,
+            "step": "start",      # start, theorie, mission_1, mission_2, quiz_1 ... quiz_10, done
+            "quiz_index": None,
         }
     return user_id, data[user_id]
 
@@ -178,16 +174,18 @@ def normalize_text(text: str) -> str:
         .replace("\n", "")
         .replace("„", "")
         .replace("“", "")
+        .replace('"', "")
+        .replace("'", "")
         .lower()
     )
 
 
 def get_level(points: int) -> str:
-    if points >= 100:
+    if points >= 120:
         return "Experte/Expertin"
-    if points >= 60:
+    if points >= 80:
         return "Fortgeschritten"
-    if points >= 30:
+    if points >= 40:
         return "Lerner/Lernerin"
     return "Anfänger/Anfängerin"
 
@@ -195,9 +193,7 @@ def get_level(points: int) -> str:
 async def set_bot_commands(app):
     commands = [
         BotCommand("start", "Bot starten"),
-        BotCommand("theorie", "Theorie lesen"),
-        BotCommand("mission", "Eine Mission erhalten"),
-        BotCommand("quiz", "Ein Quiz erhalten"),
+        BotCommand("weiter", "Zum nächsten Schritt gehen"),
         BotCommand("punkte", "Punkte anzeigen"),
         BotCommand("niveau", "Niveau anzeigen"),
         BotCommand("hilfe", "Hilfe öffnen"),
@@ -208,104 +204,126 @@ async def set_bot_commands(app):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     user_id, user = get_user(update, data)
+    user["step"] = "theorie"
+    user["quiz_index"] = None
     save_data(data)
 
-    text = (
+    caption = (
         f"Willkommen, {user['name']}! 👋\n\n"
         "Thema: Geschlecht und Artikel im Deutschen\n\n"
-        "Bitte arbeiten Sie in dieser Reihenfolge:\n"
-        "1. /theorie lesen\n"
-        "2. /mission bearbeiten\n"
-        "3. /quiz lösen\n\n"
+        "Lernweg:\n"
+        "1. Theorie lesen\n"
+        "2. Mission 1 lösen\n"
+        "3. Mission 2 lösen\n"
+        "4. 10 Quizfragen beantworten\n"
+        "5. Ergebnis sehen\n\n"
         "Befehle:\n"
-        "/theorie – Theorie lesen\n"
-        "/mission – Mission erhalten\n"
-        "/quiz – Quiz erhalten\n"
-        "/punkte – Punkte sehen\n"
-        "/niveau – Niveau sehen\n"
-        "/hilfe – Hilfe"
+        "/weiter – nächster Schritt\n"
+        "/punkte – Ihre Punkte\n"
+        "/niveau – Ihr Niveau\n"
+        "/hilfe – Hilfe\n\n"
+        "Bitte lesen Sie jetzt zuerst die Theorie."
     )
-    await update.message.reply_text(text)
 
+    if os.path.exists(LOGO_FILE):
+        with open(LOGO_FILE, "rb") as photo:
+            await context.bot.send_photo(
+                chat_id=update.effective_chat.id,
+                photo=photo,
+                caption=caption
+            )
+    else:
+        await update.message.reply_text(caption)
 
-async def theorie(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = load_data()
-    user_id, user = get_user(update, data)
-    user["theory_read"] = True
-    save_data(data)
     await update.message.reply_text(THEORY_TEXT)
 
 
 async def hilfe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "Hilfebereich 🛠\n\n"
-        "So arbeiten Sie mit dem Bot:\n"
-        "1. Lesen Sie zuerst /theorie\n"
-        "2. Bearbeiten Sie dann /mission\n"
-        "3. Lösen Sie danach /quiz\n\n"
-        "Befehle:\n"
-        "/theorie\n"
-        "/mission\n"
-        "/quiz\n"
-        "/punkte\n"
-        "/niveau\n"
-        "/hilfe\n\n"
+        "Dieser Bot arbeitet Schritt für Schritt.\n\n"
+        "So gehen Sie vor:\n"
+        "• /start\n"
+        "• Theorie lesen\n"
+        "• /weiter\n"
+        "• Mission lösen\n"
+        "• /weiter\n"
+        "• nächste Mission lösen\n"
+        "• /weiter\n"
+        "• Quiz lösen\n\n"
+        "Wichtige Befehle:\n"
+        "/start – Bot starten\n"
+        "/weiter – nächster Schritt\n"
+        "/punkte – Punkte sehen\n"
+        "/niveau – Niveau sehen\n"
+        "/hilfe – Hilfe\n\n"
         "Quiz-Antworten:\n"
         "/a\n"
         "/b\n"
-        "/c\n\n"
-        "Die Antwort auf eine Mission senden Sie bitte als normale Nachricht."
+        "/c"
     )
     await update.message.reply_text(text)
 
 
-async def mission(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def weiter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     user_id, user = get_user(update, data)
+    step = user.get("step", "start")
 
-    if not user.get("theory_read"):
+    if step == "theorie":
+        user["step"] = "mission_1"
+        save_data(data)
+        await update.message.reply_text(MISSIONS[0]["task"])
+        return
+
+    if step == "mission_1_done":
+        user["step"] = "mission_2"
+        save_data(data)
+        await update.message.reply_text(MISSIONS[1]["task"])
+        return
+
+    if step == "mission_2_done":
+        user["step"] = "quiz_1"
+        user["quiz_index"] = 0
+        save_data(data)
+        await send_quiz(update, context, 0)
+        return
+
+    if step.startswith("quiz_"):
+        quiz_index = user.get("quiz_index")
+        if quiz_index is None:
+            await update.message.reply_text("Bitte starten Sie zuerst mit /start.")
+            return
+
+        if quiz_index < len(QUIZZES) - 1:
+            quiz_index += 1
+            user["quiz_index"] = quiz_index
+            user["step"] = f"quiz_{quiz_index + 1}"
+            save_data(data)
+            await send_quiz(update, context, quiz_index)
+            return
+        else:
+            user["step"] = "done"
+            save_data(data)
+            await send_final_result(update, context, user)
+            return
+
+    if step == "done":
         await update.message.reply_text(
-            "Bitte lesen Sie zuerst die Theorie mit /theorie."
+            "Sie haben diese Lerneinheit bereits abgeschlossen. 🎉\n"
+            "Senden Sie /start, wenn Sie noch einmal beginnen möchten."
         )
         return
 
-    current = user.get("current_mission")
-    if current is None:
-        mission_obj = MISSIONS[0]
-        user["current_mission"] = mission_obj["id"]
-    elif current == 1:
-        mission_obj = MISSIONS[1]
-        user["current_mission"] = mission_obj["id"]
-    else:
-        mission_obj = MISSIONS[0]
-        user["current_mission"] = mission_obj["id"]
-
-    save_data(data)
-    await update.message.reply_text(mission_obj["task"])
+    await update.message.reply_text(
+        "Bitte starten Sie zuerst mit /start."
+    )
 
 
-async def quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = load_data()
-    user_id, user = get_user(update, data)
-
-    if not user.get("theory_read"):
-        await update.message.reply_text(
-            "Bitte lesen Sie zuerst die Theorie mit /theorie."
-        )
-        return
-
-    quiz_index = user.get("current_quiz")
-    if quiz_index is None:
-        quiz_index = 0
-    else:
-        quiz_index = (quiz_index + 1) % len(QUIZZES)
-
-    user["current_quiz"] = quiz_index
-    save_data(data)
-
-    q = QUIZZES[quiz_index]
+async def send_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE, index: int):
+    q = QUIZZES[index]
     text = (
-        f"Quiz {quiz_index + 1} 🧠\n\n"
+        f"Quiz {index + 1} 🧠\n\n"
         f"{q['question']}\n\n"
         f"a) {q['options']['a']}\n"
         f"b) {q['options']['b']}\n"
@@ -334,9 +352,16 @@ async def check_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     data = load_data()
     user_id, user = get_user(update, data)
 
-    quiz_index = user.get("current_quiz")
+    step = user.get("step", "")
+    if not step.startswith("quiz_"):
+        await update.message.reply_text(
+            "Im Moment ist kein Quiz aktiv.\nBitte senden Sie /weiter."
+        )
+        return
+
+    quiz_index = user.get("quiz_index")
     if quiz_index is None:
-        await update.message.reply_text("Bitte starten Sie zuerst ein Quiz mit /quiz.")
+        await update.message.reply_text("Bitte senden Sie /weiter.")
         return
 
     q = QUIZZES[quiz_index]
@@ -346,7 +371,8 @@ async def check_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         save_data(data)
 
         await update.message.reply_text(
-            f"Richtig! ✅\n{q['explanation']}\nSie haben +10 Punkte bekommen."
+            f"Richtig! ✅\n{q['explanation']}\nSie haben +10 Punkte bekommen.\n\n"
+            "Senden Sie /weiter für die nächste Aufgabe."
         )
 
         await context.bot.send_message(
@@ -366,7 +392,8 @@ async def check_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         save_data(data)
 
         await update.message.reply_text(
-            f"Falsch ❌\n{q['explanation']}\nVergebene Punkte: 0"
+            f"Falsch ❌\n{q['explanation']}\nVergebene Punkte: 0\n\n"
+            "Senden Sie /weiter für die nächste Aufgabe."
         )
 
         await context.bot.send_message(
@@ -400,86 +427,103 @@ async def niveau(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+async def send_final_result(update: Update, context: ContextTypes.DEFAULT_TYPE, user: dict):
+    text = (
+        "🎉 Abschluss der Lerneinheit\n\n"
+        "Sie haben das Thema „Geschlecht und Artikel im Deutschen“ abgeschlossen.\n\n"
+        f"Gesamtpunktzahl: {user['points']} 🏆\n"
+        f"Niveau: {get_level(user['points'])}\n\n"
+        "Senden Sie /start, wenn Sie die Einheit noch einmal bearbeiten möchten."
+    )
+    await update.message.reply_text(text)
+
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
         return
 
     data = load_data()
     user_id, user = get_user(update, data)
-
-    current_mission_id = user.get("current_mission")
-    if current_mission_id is None:
-        return
-
-    mission_obj = None
-    for m in MISSIONS:
-        if m["id"] == current_mission_id:
-            mission_obj = m
-            break
-
-    if mission_obj is None:
-        return
+    step = user.get("step", "")
 
     message_text = update.message.text
     normalized = normalize_text(message_text)
 
-    if normalized in mission_obj["answers"]:
-        user["points"] += 15
-        user["current_mission"] = None
-        save_data(data)
+    if step == "mission_1":
+        mission_obj = MISSIONS[0]
+        if normalized in mission_obj["answers"]:
+            user["points"] += 15
+            user["step"] = "mission_1_done"
+            save_data(data)
 
-        await update.message.reply_text(
-            "Richtig! ✅\n"
-            "Die Mission wurde erfolgreich gelöst.\n"
-            "Sie haben +15 Punkte bekommen."
-        )
-
-        await context.bot.send_message(
-            chat_id=ADMIN_ID,
-            text=(
-                f"📩 Missions-Antwort\n\n"
-                f"Student/in: {user['name']}\n"
-                f"ID: {user_id}\n\n"
-                f"Mission: {mission_obj['id']}\n"
-                f"Aufgabe: {mission_obj['task']}\n"
-                f"Antwort: {message_text}\n"
-                f"Ergebnis: RICHTIG ✅\n"
-                f"Vergebene Punkte: +15\n"
-                f"Gesamtpunktzahl: {user['points']} 🏆"
+            await update.message.reply_text(
+                "Richtig! ✅\n"
+                "Mission 1 wurde erfolgreich gelöst.\n"
+                "Sie haben +15 Punkte bekommen.\n\n"
+                "Senden Sie /weiter für Mission 2."
             )
-        )
-    else:
-        save_data(data)
 
-        await update.message.reply_text(
-            "Noch nicht richtig ❌\n"
-            "Bitte versuchen Sie es noch einmal."
-        )
-
-        await context.bot.send_message(
-            chat_id=ADMIN_ID,
-            text=(
-                f"📩 Missions-Antwort\n\n"
-                f"Student/in: {user['name']}\n"
-                f"ID: {user_id}\n\n"
-                f"Mission: {mission_obj['id']}\n"
-                f"Aufgabe: {mission_obj['task']}\n"
-                f"Antwort: {message_text}\n"
-                f"Ergebnis: FALSCH ❌\n"
-                f"Vergebene Punkte: 0\n"
-                f"Gesamtpunktzahl: {user['points']} 🏆"
+            await context.bot.send_message(
+                chat_id=ADMIN_ID,
+                text=(
+                    f"📩 Missions-Antwort\n\n"
+                    f"Student/in: {user['name']}\n"
+                    f"ID: {user_id}\n\n"
+                    f"Mission: 1\n"
+                    f"Antwort: {message_text}\n"
+                    f"Ergebnis: RICHTIG ✅\n"
+                    f"Vergebene Punkte: +15\n"
+                    f"Gesamtpunktzahl: {user['points']} 🏆"
+                )
             )
-        )
+        else:
+            await update.message.reply_text(
+                "Noch nicht richtig ❌\n"
+                "Bitte versuchen Sie es noch einmal."
+            )
+        return
+
+    if step == "mission_2":
+        mission_obj = MISSIONS[1]
+        if normalized in mission_obj["answers"]:
+            user["points"] += 15
+            user["step"] = "mission_2_done"
+            save_data(data)
+
+            await update.message.reply_text(
+                "Richtig! ✅\n"
+                "Mission 2 wurde erfolgreich gelöst.\n"
+                "Sie haben +15 Punkte bekommen.\n\n"
+                "Senden Sie /weiter für Quiz 1."
+            )
+
+            await context.bot.send_message(
+                chat_id=ADMIN_ID,
+                text=(
+                    f"📩 Missions-Antwort\n\n"
+                    f"Student/in: {user['name']}\n"
+                    f"ID: {user_id}\n\n"
+                    f"Mission: 2\n"
+                    f"Antwort: {message_text}\n"
+                    f"Ergebnis: RICHTIG ✅\n"
+                    f"Vergebene Punkte: +15\n"
+                    f"Gesamtpunktzahl: {user['points']} 🏆"
+                )
+            )
+        else:
+            await update.message.reply_text(
+                "Noch nicht richtig ❌\n"
+                "Bitte versuchen Sie es noch einmal."
+            )
+        return
 
 
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("theorie", theorie))
+    app.add_handler(CommandHandler("weiter", weiter))
     app.add_handler(CommandHandler("hilfe", hilfe))
-    app.add_handler(CommandHandler("mission", mission))
-    app.add_handler(CommandHandler("quiz", quiz))
     app.add_handler(CommandHandler("punkte", punkte))
     app.add_handler(CommandHandler("niveau", niveau))
 
