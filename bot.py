@@ -16,7 +16,7 @@ from telegram.ext import (
     filters,
 )
 
-TOKEN = os.getenv("TOKEN", "HIER_DEIN_BOTFATHER_TOKEN")
+TOKEN = os.getenv("TOKEN", "8753301957:AAFpx6qa7DoNItH80kxboa8rnVByCnithe0")
 ADMIN_ID = 6051699852
 DATA_FILE = "users.json"
 LOGO_FILE = "logo.png"
