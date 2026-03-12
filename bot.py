@@ -219,7 +219,7 @@ GRAMMAR_QUIZZES = [
         "correct": "a",
         "explanation": "Richtig ist: *mein Kind*.",
     },
-]
+
 
 FAMILY_QUIZZES = [
     {
@@ -282,7 +282,7 @@ FAMILY_QUIZZES = [
         "correct": "a",
         "explanation": "Richtig ist: *to‘y*.",
     },
-]
+
 
 # -----------------------------------
 # HILFSFUNKTIONEN
@@ -373,7 +373,7 @@ async def set_bot_commands(app):
         BotCommand("punkte", "Punkte anzeigen"),
         BotCommand("niveau", "Niveau anzeigen"),
         BotCommand("ranking", "Bestenliste anzeigen"),
-    ]
+    
     await app.bot.set_my_commands(commands)
 
 # -----------------------------------
@@ -642,7 +642,7 @@ async def go_next_step(update_or_query, context: ContextTypes.DEFAULT_TYPE):
         "Bitte starten Sie zuerst mit *🔄 Start*.",
         parse_mode="Markdown",
         reply_markup=main_menu_keyboard(),
-    )
+    
 
 # -----------------------------------
 # CALLBACK BUTTONS
@@ -826,7 +826,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "vater", "mutter", "bruder", "schwester", "familie",
             "eltern", "großvater", "großmutter", "kind", "kinder",
             "onkel", "tante", "cousin", "cousine"
-        ]
+        
         found = any(word in text_lower for word in family_words)
 
         if sentence_count >= 2 and found:
