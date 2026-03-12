@@ -156,7 +156,7 @@ MISSIONS = [
         "answers": ["mein"],
         "points": 15,
     },
-]
+
 
 GRAMMAR_QUIZZES = [
     {
