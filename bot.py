@@ -1,11 +1,18 @@
 import json
 import os
-from telegram import Update, BotCommand
+from telegram import (
+    Update,
+    BotCommand,
+    ReplyKeyboardMarkup,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+)
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     ContextTypes,
     MessageHandler,
+    CallbackQueryHandler,
     filters,
 )
 
@@ -14,158 +21,179 @@ ADMIN_ID = 6051699852
 DATA_FILE = "users.json"
 LOGO_FILE = "logo.png"
 
+# -----------------------------
+# Texte
+# -----------------------------
 THEORY_TEXT = (
-    "📘 Theorie: Einführung in Python\n\n"
-    "Python ist eine Programmiersprache. Sie ist einfach und sehr gut für Anfänger geeignet.\n\n"
-    "Mit Python kann man Programme schreiben, Daten verarbeiten und viele Aufgaben automatisieren.\n\n"
-    "Eine Variable speichert einen Wert.\n\n"
-    "Beispiel:\n"
-    "x = 10\n\n"
-    "Hier ist:\n"
-    "• x → die Variable\n"
-    "• 10 → der Wert\n\n"
-    "Ein weiteres Beispiel:\n"
-    "name = \"Ali\"\n\n"
-    "Die Funktion print() gibt Informationen auf dem Bildschirm aus.\n\n"
-    "Beispiel:\n"
-    "print(\"Hallo\")\n\n"
-    "Wichtige Regeln:\n"
-    "• Texte stehen in Anführungszeichen\n"
-    "• Zahlen schreibt man direkt\n"
-    "• Das Gleichheitszeichen = benutzt man für eine Zuweisung\n\n"
-    "Wenn Sie fertig sind, senden Sie bitte /weiter."
+    "📘 *Theorie: Die Familie*\n\n"
+    "Die Familie ist ein wichtiges Thema im Alltag. "
+    "Man spricht oft über Eltern, Geschwister, Großeltern und Kinder.\n\n"
+    "In dieser Lektion lernen Sie:\n"
+    "• Wortschatz zum Thema Familie\n"
+    "• einen Lesetext\n"
+    "• Grammatik: Possessivartikel\n"
+    "• Missionen\n"
+    "• Quizfragen\n\n"
+    "Bitte nutzen Sie die Schaltfläche *Weiter*."
 )
 
 VOCAB_TEXT = (
-    "📚 Wortschatz: Python-Grundlagen\n\n"
-    "die Programmiersprache — dasturlash tili — язык программирования\n"
-    "das Programm — dastur — программа\n"
-    "der Code — kod — код\n"
-    "programmieren — dasturlash — программировать\n"
-    "die Variable — o‘zgaruvchi — переменная\n"
-    "der Wert — qiymat — значение\n"
-    "die Zahl — son — число\n"
-    "der Text — matn — текст\n"
-    "die Zeichenkette — satr / string — строка\n"
-    "die Funktion — funksiya — функция\n"
-    "die print-Funktion — print funksiyasi — функция print\n"
-    "ausgeben — chiqarish — выводить\n"
-    "anzeigen — ko‘rsatish — отображать\n"
-    "das Gleichheitszeichen — teng belgisi — знак равенства\n"
-    "die Klammer — qavs — скобка\n"
-    "die Anführungszeichen — qo‘shtirnoq — кавычки\n"
-    "der Befehl — buyruq — команда\n"
-    "das Ergebnis — natija — результат\n"
-    "der Fehler — xato — ошибка\n"
-    "die Datei — fayl — файл\n\n"
-    "Wenn Sie fertig sind, senden Sie bitte /weiter."
+    "📚 *Wortschatz: Die Familie*\n\n"
+    "die Familie — oila — семья\n"
+    "der Vater — ota — отец\n"
+    "die Mutter — ona — мать\n"
+    "die Eltern — ota-ona — родители\n"
+    "der Sohn — o‘g‘il — сын\n"
+    "die Tochter — qiz — дочь\n"
+    "der Bruder — aka/uka — брат\n"
+    "die Schwester — opa/singil — сестра\n"
+    "die Geschwister — aka-uka / opa-singillar — братья и сёстры\n"
+    "der Großvater — bobo — дедушка\n"
+    "die Großmutter — buvi — бабушка\n"
+    "die Großeltern — bobo va buvi — дедушка и бабушка\n"
+    "der Enkel — nabira — внук\n"
+    "die Enkelin — nabira qiz — внучка\n"
+    "der Onkel — amaki / tog‘a — дядя\n"
+    "die Tante — xola / amma — тётя\n"
+    "der Cousin — amakivachcha — двоюродный брат\n"
+    "die Cousine — amakivachcha qiz — двоюродная сестра\n"
+    "der Ehemann — er — муж\n"
+    "die Ehefrau — xotin — жена\n"
+    "das Kind — bola — ребёнок\n"
+    "die Kinder — bolalar — дети\n"
+    "ledig — bo‘ydoq — холостой\n"
+    "verheiratet — turmush qurgan — женат / замужем\n"
+    "geschieden — ajrashgan — разведён / разведена\n"
+    "die Hochzeit — to‘y — свадьба\n"
+    "heiraten — turmush qurmoq — жениться / выходить замуж\n"
+    "wohnen — yashamoq — жить\n"
+    "arbeiten — ishlamoq — работать\n"
+    "studieren — o‘qimoq — учиться в университете\n"
+    "zur Schule gehen — maktabga bormoq — ходить в школу\n"
+    "freundlich — mehribon — дружелюбный\n"
+    "der Zusammenhalt — jipslik — сплочённость\n"
+    "mein / meine — mening — мой / моя / мои\n"
+    "sein / seine — uning — его\n"
+    "ihr / ihre — uning — её\n\n"
+    "Bitte nutzen Sie die Schaltfläche *Weiter*."
+)
+
+READING_TEXT = (
+    "📖 *Lesetext: Meine Familie*\n\n"
+    "Meine Familie ist nicht sehr groß, aber sehr freundlich.\n"
+    "Ich habe einen Vater, eine Mutter und zwei Geschwister.\n\n"
+    "Mein Vater heißt Karim. Er ist Ingenieur und arbeitet in einer Firma.\n"
+    "Meine Mutter heißt Dilnoza. Sie ist Lehrerin und arbeitet an einer Schule.\n\n"
+    "Ich habe einen Bruder und eine Schwester.\n"
+    "Mein Bruder studiert Informatik an der Universität.\n"
+    "Meine Schwester geht noch zur Schule.\n\n"
+    "Meine Großeltern wohnen in einem Dorf.\n"
+    "Wir besuchen sie oft am Wochenende.\n\n"
+    "In meiner Familie ist Zusammenhalt sehr wichtig.\n"
+    "Wir essen oft zusammen und sprechen über unseren Tag.\n"
+    "Ich liebe meine Familie sehr.\n\n"
+    "Bitte nutzen Sie die Schaltfläche *Weiter*."
+)
+
+GRAMMAR_TEXT = (
+    "📘 *Grammatik: Possessivartikel*\n\n"
+    "Possessivartikel zeigen Besitz oder Zugehörigkeit.\n\n"
+    "Beispiele:\n"
+    "• mein Vater\n"
+    "• meine Mutter\n"
+    "• mein Bruder\n"
+    "• meine Schwester\n"
+    "• meine Eltern\n\n"
+    "*Tabelle:*\n"
+    "ich → mein / meine\n"
+    "du → dein / deine\n"
+    "er → sein / seine\n"
+    "sie → ihr / ihre\n"
+    "wir → unser / unsere\n\n"
+    "*Merksatz:*\n"
+    "• maskulin / neutrum → oft *mein*\n"
+    "• feminin / Plural → oft *meine*\n\n"
+    "Beispiele:\n"
+    "Das ist mein Vater.\n"
+    "Das ist meine Mutter.\n"
+    "Das sind meine Eltern.\n\n"
+    "Bitte nutzen Sie die Schaltfläche *Weiter*."
 )
 
 MISSIONS = [
     {
         "id": 1,
         "task": (
-            "Mission 1 💻\n\n"
-            "Erstellen Sie eine Variable `x` mit dem Wert `10`.\n\n"
-            "Bitte senden Sie Ihre Antwort als normale Nachricht."
+            "✍️ *Mission 1*\n\n"
+            "Lesen Sie den Text und beantworten Sie die Frage:\n\n"
+            "*Wie viele Geschwister hat die Person?*"
         ),
-        "answers": ["x=10"],
+        "answers": ["zwei", "2"],
+        "points": 15,
     },
     {
         "id": 2,
         "task": (
-            "Mission 2 💻\n\n"
-            "Erstellen Sie eine Variable `name` mit dem Wert `\"Ali\"`.\n\n"
-            "Bitte senden Sie Ihre Antwort als normale Nachricht."
+            "✍️ *Mission 2*\n\n"
+            "Schreiben Sie *zwei Sätze* über Ihre Familie.\n\n"
+            "Beispiel:\n"
+            "Das ist mein Vater.\n"
+            "Das ist meine Mutter."
         ),
-        "answers": ["name=ali"],
+        "special": "free_text_family",
+        "points": 20,
     },
     {
         "id": 3,
         "task": (
-            "Mission 3 💻\n\n"
-            "Schreiben Sie einen Befehl mit `print()`, der `\"Hallo\"` ausgibt.\n\n"
-            "Bitte senden Sie Ihre Antwort als normale Nachricht."
+            "✍️ *Mission 3*\n\n"
+            "Ergänzen Sie den richtigen Possessivartikel:\n\n"
+            "*Das ist ___ Bruder.*\n\n"
+            "Bitte senden Sie nur *ein Wort*."
         ),
-        "answers": ["print(hallo)"],
+        "answers": ["mein"],
+        "points": 15,
     },
 ]
 
-QUIZZES = [
-    {
-        "question": "Was ist Python?",
-        "options": {"a": "ein Betriebssystem", "b": "eine Programmiersprache", "c": "ein Browser"},
-        "correct": "b",
-        "explanation": "Richtig ist: Python ist eine Programmiersprache.",
-    },
-    {
-        "question": "Was ist eine Variable?",
-        "options": {"a": "ein gespeicherter Name für einen Wert", "b": "ein Bild", "c": "ein Fehler"},
-        "correct": "a",
-        "explanation": "Richtig ist: Eine Variable speichert einen Wert.",
-    },
-    {
-        "question": "Welches Zeichen benutzt man für eine Zuweisung?",
-        "options": {"a": "+", "b": "=", "c": ":"},
-        "correct": "b",
-        "explanation": "Richtig ist: =",
-    },
-    {
-        "question": "Was ist ein Text?",
-        "options": {"a": "15", "b": "\"Ali\"", "c": "10"},
-        "correct": "b",
-        "explanation": "Richtig ist: \"Ali\" ist ein Text.",
-    },
-    {
-        "question": "Was macht print()?",
-        "options": {"a": "Es löscht Daten", "b": "Es erstellt Variablen", "c": "Es gibt Informationen aus"},
-        "correct": "c",
-        "explanation": "Richtig ist: print() gibt Informationen aus.",
-    },
-    {
-        "question": "Welche Schreibweise ist richtig?",
-        "options": {"a": "name = Ali", "b": "name = \"Ali\"", "c": "name : \"Ali\""},
-        "correct": "b",
-        "explanation": "Richtig ist: name = \"Ali\"",
-    },
-    {
-        "question": "Was ist die Ausgabe?\n\nx = 5\nprint(x)",
-        "options": {"a": "x", "b": "5", "c": "Fehler"},
-        "correct": "b",
-        "explanation": "Richtig ist: 5",
-    },
-    {
-        "question": "Was ist eine Zahl?",
-        "options": {"a": "\"10\"", "b": "10", "c": "\"Hallo\""},
-        "correct": "b",
-        "explanation": "Richtig ist: 10 ist eine Zahl.",
-    },
-    {
-        "question": "Welche Zeile ist Python-Code?",
-        "options": {"a": "print(\"Hallo\")", "b": "<h1>Hallo</h1>", "c": "SELECT * FROM users"},
-        "correct": "a",
-        "explanation": "Richtig ist: print(\"Hallo\")",
-    },
-    {
-        "question": "Wofür braucht man Variablen?",
-        "options": {"a": "zum Zeichnen", "b": "zum Speichern von Werten", "c": "zum Drucken von Bildern"},
-        "correct": "b",
-        "explanation": "Richtig ist: Variablen speichert man für Werte.",
-    },
+GRAMMAR_QUIZZES = [
+    {"question": "Das ist ___ Vater.", "options": {"a": "mein", "b": "meine", "c": "meinen"}, "correct": "a", "explanation": "Richtig ist: mein Vater."},
+    {"question": "Das ist ___ Mutter.", "options": {"a": "mein", "b": "meine", "c": "meiner"}, "correct": "b", "explanation": "Richtig ist: meine Mutter."},
+    {"question": "Das sind ___ Eltern.", "options": {"a": "mein", "b": "meine", "c": "meiner"}, "correct": "b", "explanation": "Richtig ist: meine Eltern."},
+    {"question": "Das ist ___ Bruder.", "options": {"a": "mein", "b": "meine", "c": "meinen"}, "correct": "a", "explanation": "Richtig ist: mein Bruder."},
+    {"question": "Das ist ___ Schwester.", "options": {"a": "mein", "b": "meine", "c": "meinen"}, "correct": "b", "explanation": "Richtig ist: meine Schwester."},
+    {"question": "„sein Vater“ bedeutet …", "options": {"a": "uning otasi", "b": "mening otam", "c": "sizning otangiz"}, "correct": "a", "explanation": "Richtig ist: uning otasi."},
+    {"question": "„ihre Mutter“ bedeutet …", "options": {"a": "uning onasi", "b": "mening onam", "c": "bizning onamiz"}, "correct": "a", "explanation": "Richtig ist: uning onasi."},
+    {"question": "Possessivartikel zeigen …", "options": {"a": "Zeit", "b": "Besitz", "c": "Ort"}, "correct": "b", "explanation": "Richtig ist: Besitz."},
+    {"question": "Das ist ___ Familie.", "options": {"a": "mein", "b": "meine", "c": "meiner"}, "correct": "b", "explanation": "Richtig ist: meine Familie."},
+    {"question": "Das ist ___ Kind.", "options": {"a": "mein", "b": "meine", "c": "meiner"}, "correct": "a", "explanation": "Richtig ist: mein Kind."},
 ]
 
+FAMILY_QUIZZES = [
+    {"question": "Wie sagt man „ota“ auf Deutsch?", "options": {"a": "Vater", "b": "Bruder", "c": "Sohn"}, "correct": "a", "explanation": "Richtig ist: der Vater."},
+    {"question": "Wie sagt man „ona“ auf Deutsch?", "options": {"a": "Schwester", "b": "Mutter", "c": "Tante"}, "correct": "b", "explanation": "Richtig ist: die Mutter."},
+    {"question": "Bruder bedeutet …", "options": {"a": "aka/uka", "b": "bobo", "c": "amaki"}, "correct": "a", "explanation": "Richtig ist: aka/uka."},
+    {"question": "Schwester bedeutet …", "options": {"a": "opa/singil", "b": "qiz", "c": "xola"}, "correct": "a", "explanation": "Richtig ist: opa/singil."},
+    {"question": "Eltern bedeutet …", "options": {"a": "ota-ona", "b": "bolalar", "c": "amakivachchalar"}, "correct": "a", "explanation": "Richtig ist: ota-ona."},
+    {"question": "Großvater bedeutet …", "options": {"a": "bobo", "b": "amaki", "c": "tog‘a"}, "correct": "a", "explanation": "Richtig ist: bobo."},
+    {"question": "Großmutter bedeutet …", "options": {"a": "buvi", "b": "xola", "c": "opa"}, "correct": "a", "explanation": "Richtig ist: buvi."},
+    {"question": "Cousin bedeutet …", "options": {"a": "amakivachcha", "b": "o‘g‘il", "c": "ota"}, "correct": "a", "explanation": "Richtig ist: amakivachcha."},
+    {"question": "Enkel bedeutet …", "options": {"a": "nabira", "b": "aka", "c": "ota"}, "correct": "a", "explanation": "Richtig ist: nabira."},
+    {"question": "Hochzeit bedeutet …", "options": {"a": "to‘y", "b": "tug‘ilgan kun", "c": "bayram"}, "correct": "a", "explanation": "Richtig ist: to‘y."},
+]
 
+# -----------------------------
+# Hilfsfunktionen
+# -----------------------------
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
-
 def save_data(data):
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
-
 
 def get_user(update: Update, data: dict):
     user_id = str(update.effective_user.id)
@@ -173,11 +201,11 @@ def get_user(update: Update, data: dict):
         data[user_id] = {
             "name": update.effective_user.first_name or "Student/in",
             "points": 0,
-            "step": "start",   # theory, vocab, mission_1 ... quiz_10, done
-            "quiz_index": None,
+            "step": "start",
+            "grammar_quiz_index": None,
+            "family_quiz_index": None,
         }
     return user_id, data[user_id]
-
 
 def normalize_text(text: str) -> str:
     return (
@@ -187,54 +215,86 @@ def normalize_text(text: str) -> str:
         .replace('"', "")
         .replace("'", "")
         .replace("`", "")
+        .replace("„", "")
+        .replace("“", "")
         .lower()
     )
 
-
 def get_level(points: int) -> str:
-    if points >= 130:
-        return "Experte/Expertin"
-    if points >= 90:
+    if points >= 220:
+        return "Top-Lerner/in"
+    if points >= 170:
+        return "Sehr gut"
+    if points >= 120:
         return "Fortgeschritten"
-    if points >= 50:
-        return "Lerner/Lernerin"
-    return "Anfänger/Anfängerin"
+    if points >= 70:
+        return "Lerner/in"
+    return "Anfänger/in"
 
+def main_menu_keyboard():
+    return ReplyKeyboardMarkup(
+        [
+            ["▶️ Weiter", "🏆 Ranking"],
+            ["📊 Punkte", "📈 Niveau"],
+            ["❓ Hilfe", "🔄 Start"],
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=False,
+    )
 
+def continue_inline():
+    return InlineKeyboardMarkup(
+        [[InlineKeyboardButton("▶️ Weiter", callback_data="continue")]]
+    )
+
+def quiz_inline_keyboard():
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("A", callback_data="quiz:a"),
+             InlineKeyboardButton("B", callback_data="quiz:b"),
+             InlineKeyboardButton("C", callback_data="quiz:c")]
+        ]
+    )
+
+# -----------------------------
+# Bot Commands
+# -----------------------------
 async def set_bot_commands(app):
     commands = [
-        BotCommand("start", "Bot starten"),
+        BotCommand("start", "Lektion starten"),
         BotCommand("weiter", "Zum nächsten Schritt gehen"),
         BotCommand("hilfe", "Hilfe öffnen"),
         BotCommand("punkte", "Punkte anzeigen"),
         BotCommand("niveau", "Niveau anzeigen"),
+        BotCommand("ranking", "Bestenliste anzeigen"),
     ]
     await app.bot.set_my_commands(commands)
 
-
+# -----------------------------
+# Start / Menüs
+# -----------------------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
-    user_id, user = get_user(update, data)
+    _, user = get_user(update, data)
     user["step"] = "theory"
-    user["quiz_index"] = None
+    user["grammar_quiz_index"] = None
+    user["family_quiz_index"] = None
     save_data(data)
 
     caption = (
         f"Willkommen, {user['name']}! 👋\n\n"
-        "Lektion 1: Einführung in Python\n"
-        "Thema: Variablen und print()\n\n"
-        "Lernweg:\n"
+        "*Thema:* Die Familie\n"
+        "*Niveau:* A2–B1\n\n"
+        "*Lernweg:*\n"
         "1. Theorie\n"
         "2. Wortschatz\n"
-        "3. 3 Missionen\n"
-        "4. 10 Quizfragen\n"
-        "5. Abschluss\n\n"
-        "Befehle:\n"
-        "/weiter – nächster Schritt\n"
-        "/hilfe – Hilfe\n"
-        "/punkte – Ihre Punkte\n"
-        "/niveau – Ihr Niveau\n\n"
-        "Bitte lesen Sie jetzt zuerst die Theorie."
+        "3. Lesetext\n"
+        "4. Grammatik\n"
+        "5. 3 Missionen\n"
+        "6. 10 Grammatik-Quizfragen\n"
+        "7. 10 Quizfragen zum Thema Familie\n"
+        "8. Abschluss + Ranking\n\n"
+        "Bitte beginnen Sie mit der Theorie."
     )
 
     if os.path.exists(LOGO_FILE):
@@ -242,158 +302,297 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_photo(
                 chat_id=update.effective_chat.id,
                 photo=photo,
-                caption=caption
+                caption=caption,
+                parse_mode="Markdown",
+                reply_markup=main_menu_keyboard(),
             )
     else:
-        await update.message.reply_text(caption)
+        await update.message.reply_text(
+            caption,
+            parse_mode="Markdown",
+            reply_markup=main_menu_keyboard(),
+        )
 
-    await update.message.reply_text(THEORY_TEXT)
-
+    await update.message.reply_text(
+        THEORY_TEXT,
+        parse_mode="Markdown",
+        reply_markup=continue_inline(),
+    )
 
 async def hilfe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
-        "Hilfebereich 🛠\n\n"
+        "*Hilfebereich* 🛠\n\n"
         "So arbeiten Sie mit dem Bot:\n"
-        "1. /start\n"
-        "2. Theorie lesen\n"
-        "3. /weiter\n"
-        "4. Wortschatz lesen\n"
-        "5. /weiter\n"
-        "6. Missionen lösen\n"
-        "7. /weiter\n"
-        "8. Quiz lösen\n\n"
-        "Befehle:\n"
-        "/start\n"
-        "/weiter\n"
-        "/hilfe\n"
-        "/punkte\n"
-        "/niveau\n\n"
-        "Quiz-Antworten:\n"
-        "/a\n"
-        "/b\n"
-        "/c"
+        "1. Starten Sie die Lektion\n"
+        "2. Lesen Sie Theorie, Wortschatz, Text und Grammatik\n"
+        "3. Lösen Sie die Missionen\n"
+        "4. Beantworten Sie die Quizfragen über Buttons\n\n"
+        "*Wichtige Funktionen:*\n"
+        "• ▶️ Weiter\n"
+        "• 📊 Punkte\n"
+        "• 📈 Niveau\n"
+        "• 🏆 Ranking\n"
+        "• 🔄 Start"
     )
-    await update.message.reply_text(text)
+    await update.message.reply_text(
+        text,
+        parse_mode="Markdown",
+        reply_markup=main_menu_keyboard(),
+    )
 
-
-async def weiter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def punkte(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
-    user_id, user = get_user(update, data)
+    _, user = get_user(update, data)
+    await update.message.reply_text(
+        f"{user['name']}, Ihre Gesamtpunktzahl ist: *{user['points']}* 🏆",
+        parse_mode="Markdown",
+        reply_markup=main_menu_keyboard(),
+    )
+
+async def niveau(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = load_data()
+    _, user = get_user(update, data)
+    await update.message.reply_text(
+        f"{user['name']}, Ihr aktuelles Niveau ist: *{get_level(user['points'])}*",
+        parse_mode="Markdown",
+        reply_markup=main_menu_keyboard(),
+    )
+
+async def ranking(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = load_data()
+
+    if not data:
+        await update.message.reply_text(
+            "Es gibt noch keine Daten.",
+            reply_markup=main_menu_keyboard(),
+        )
+        return
+
+    sorted_users = sorted(
+        data.items(),
+        key=lambda item: item[1].get("points", 0),
+        reverse=True
+    )
+
+    medals = ["🥇", "🥈", "🥉"]
+    text = "🏆 *Bestenliste*\n\n"
+
+    for i, (_, user) in enumerate(sorted_users[:10], start=1):
+        prefix = medals[i - 1] if i <= 3 else f"{i}."
+        text += f"{prefix} {user.get('name', 'Student/in')} — {user.get('points', 0)} Punkte\n"
+
+    await update.message.reply_text(
+        text,
+        parse_mode="Markdown",
+        reply_markup=main_menu_keyboard(),
+    )
+
+# -----------------------------
+# Weiter-Logik
+# -----------------------------
+async def weiter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await go_next_step(update, context)
+
+async def go_next_step(update_or_query, context: ContextTypes.DEFAULT_TYPE):
+    if hasattr(update_or_query, "effective_user"):
+        update = update_or_query
+        message_func = update.message.reply_text
+        data = load_data()
+        _, user = get_user(update, data)
+    else:
+        query = update_or_query
+        user_id = str(query.from_user.id)
+        data = load_data()
+        if user_id not in data:
+            data[user_id] = {
+                "name": query.from_user.first_name or "Student/in",
+                "points": 0,
+                "step": "start",
+                "grammar_quiz_index": None,
+                "family_quiz_index": None,
+            }
+        user = data[user_id]
+        message_func = query.message.reply_text
+
     step = user.get("step", "start")
 
     if step == "theory":
         user["step"] = "vocab"
         save_data(data)
-        await update.message.reply_text(VOCAB_TEXT)
+        await message_func(VOCAB_TEXT, parse_mode="Markdown", reply_markup=continue_inline())
         return
 
     if step == "vocab":
+        user["step"] = "reading"
+        save_data(data)
+        await message_func(READING_TEXT, parse_mode="Markdown", reply_markup=continue_inline())
+        return
+
+    if step == "reading":
+        user["step"] = "grammar"
+        save_data(data)
+        await message_func(GRAMMAR_TEXT, parse_mode="Markdown", reply_markup=continue_inline())
+        return
+
+    if step == "grammar":
         user["step"] = "mission_1"
         save_data(data)
-        await update.message.reply_text(MISSIONS[0]["task"])
+        await message_func(MISSIONS[0]["task"], parse_mode="Markdown", reply_markup=main_menu_keyboard())
         return
 
     if step == "mission_1_done":
         user["step"] = "mission_2"
         save_data(data)
-        await update.message.reply_text(MISSIONS[1]["task"])
+        await message_func(MISSIONS[1]["task"], parse_mode="Markdown", reply_markup=main_menu_keyboard())
         return
 
     if step == "mission_2_done":
         user["step"] = "mission_3"
         save_data(data)
-        await update.message.reply_text(MISSIONS[2]["task"])
+        await message_func(MISSIONS[2]["task"], parse_mode="Markdown", reply_markup=main_menu_keyboard())
         return
 
     if step == "mission_3_done":
-        user["step"] = "quiz_1"
-        user["quiz_index"] = 0
+        user["step"] = "grammar_quiz_1"
+        user["grammar_quiz_index"] = 0
         save_data(data)
-        await send_quiz(update, context, 0)
+        await send_grammar_quiz(message_func, 0)
         return
 
-    if step.startswith("quiz_"):
-        quiz_index = user.get("quiz_index")
-        if quiz_index is None:
-            await update.message.reply_text("Bitte senden Sie zuerst /start.")
+    if step.startswith("grammar_quiz_"):
+        idx = user.get("grammar_quiz_index")
+        if idx is None:
+            await message_func("Bitte starten Sie zuerst mit *Start*.", parse_mode="Markdown")
+            return
+        if idx < len(GRAMMAR_QUIZZES) - 1:
+            idx += 1
+            user["grammar_quiz_index"] = idx
+            user["step"] = f"grammar_quiz_{idx + 1}"
+            save_data(data)
+            await send_grammar_quiz(message_func, idx)
+            return
+        else:
+            user["step"] = "family_quiz_1"
+            user["family_quiz_index"] = 0
+            save_data(data)
+            await send_family_quiz(message_func, 0)
             return
 
-        if quiz_index < len(QUIZZES) - 1:
-            quiz_index += 1
-            user["quiz_index"] = quiz_index
-            user["step"] = f"quiz_{quiz_index + 1}"
+    if step.startswith("family_quiz_"):
+        idx = user.get("family_quiz_index")
+        if idx is None:
+            await message_func("Bitte starten Sie zuerst mit *Start*.", parse_mode="Markdown")
+            return
+        if idx < len(FAMILY_QUIZZES) - 1:
+            idx += 1
+            user["family_quiz_index"] = idx
+            user["step"] = f"family_quiz_{idx + 1}"
             save_data(data)
-            await send_quiz(update, context, quiz_index)
+            await send_family_quiz(message_func, idx)
             return
         else:
             user["step"] = "done"
             save_data(data)
-            await send_final_result(update, context, user)
+            await send_final_result(message_func, user)
             return
 
     if step == "done":
-        await update.message.reply_text(
+        await message_func(
             "Sie haben diese Lektion bereits abgeschlossen. 🎉\n"
-            "Senden Sie /start, wenn Sie noch einmal beginnen möchten."
+            "Drücken Sie *Start*, wenn Sie noch einmal beginnen möchten.",
+            parse_mode="Markdown",
+            reply_markup=main_menu_keyboard(),
         )
         return
 
-    await update.message.reply_text("Bitte senden Sie zuerst /start.")
+    await message_func("Bitte starten Sie zuerst mit *Start*.", parse_mode="Markdown", reply_markup=main_menu_keyboard())
 
-
-async def send_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE, index: int):
-    q = QUIZZES[index]
+# -----------------------------
+# Quiz senden
+# -----------------------------
+async def send_grammar_quiz(message_func, index: int):
+    q = GRAMMAR_QUIZZES[index]
     text = (
-        f"Quiz {index + 1} 🧠\n\n"
+        f"🧠 *Grammatik-Quiz {index + 1}*\n\n"
         f"{q['question']}\n\n"
-        f"a) {q['options']['a']}\n"
-        f"b) {q['options']['b']}\n"
-        f"c) {q['options']['c']}\n\n"
-        "Bitte antworten Sie mit:\n"
-        "/a\n"
-        "/b\n"
-        "/c"
+        f"A) {q['options']['a']}\n"
+        f"B) {q['options']['b']}\n"
+        f"C) {q['options']['c']}"
     )
-    await update.message.reply_text(text)
+    await message_func(text, parse_mode="Markdown", reply_markup=quiz_inline_keyboard())
 
+async def send_family_quiz(message_func, index: int):
+    q = FAMILY_QUIZZES[index]
+    text = (
+        f"👨‍👩‍👧‍👦 *Thema-Familie-Quiz {index + 1}*\n\n"
+        f"{q['question']}\n\n"
+        f"A) {q['options']['a']}\n"
+        f"B) {q['options']['b']}\n"
+        f"C) {q['options']['c']}"
+    )
+    await message_func(text, parse_mode="Markdown", reply_markup=quiz_inline_keyboard())
 
-async def answer_a(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await check_quiz_answer(update, context, "a")
+# -----------------------------
+# Callback Buttons
+# -----------------------------
+async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
 
+    data_str = query.data
 
-async def answer_b(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await check_quiz_answer(update, context, "b")
+    if data_str == "continue":
+        await go_next_step(query, context)
+        return
 
+    if data_str.startswith("quiz:"):
+        answer = data_str.split(":")[1]
+        await check_quiz_answer(query, context, answer)
+        return
 
-async def answer_c(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await check_quiz_answer(update, context, "c")
-
-
-async def check_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, answer: str):
+async def check_quiz_answer(query, context: ContextTypes.DEFAULT_TYPE, answer: str):
     data = load_data()
-    user_id, user = get_user(update, data)
+    user_id = str(query.from_user.id)
+    if user_id not in data:
+        await query.message.reply_text("Bitte starten Sie zuerst mit *Start*.", parse_mode="Markdown")
+        return
 
+    user = data[user_id]
     step = user.get("step", "")
-    if not step.startswith("quiz_"):
-        await update.message.reply_text(
-            "Im Moment ist kein Quiz aktiv.\nBitte senden Sie /weiter."
+
+    if step.startswith("grammar_quiz_"):
+        idx = user.get("grammar_quiz_index")
+        if idx is None:
+            await query.message.reply_text("Bitte nutzen Sie *Weiter*.", parse_mode="Markdown")
+            return
+        q = GRAMMAR_QUIZZES[idx]
+        quiz_type = "Grammatik"
+
+    elif step.startswith("family_quiz_"):
+        idx = user.get("family_quiz_index")
+        if idx is None:
+            await query.message.reply_text("Bitte nutzen Sie *Weiter*.", parse_mode="Markdown")
+            return
+        q = FAMILY_QUIZZES[idx]
+        quiz_type = "Familie"
+
+    else:
+        await query.message.reply_text(
+            "Im Moment ist kein Quiz aktiv.\nBitte nutzen Sie *Weiter*.",
+            parse_mode="Markdown",
+            reply_markup=main_menu_keyboard(),
         )
         return
-
-    quiz_index = user.get("quiz_index")
-    if quiz_index is None:
-        await update.message.reply_text("Bitte senden Sie /weiter.")
-        return
-
-    q = QUIZZES[quiz_index]
 
     if answer == q["correct"]:
         user["points"] += 10
         save_data(data)
 
-        await update.message.reply_text(
-            f"Richtig! ✅\n{q['explanation']}\nSie haben +10 Punkte bekommen.\n\n"
-            "Senden Sie /weiter für den nächsten Schritt."
+        await query.message.reply_text(
+            f"Richtig! ✅\n{q['explanation']}\nSie haben *+10 Punkte* bekommen.\n\n"
+            "Nutzen Sie *Weiter* für den nächsten Schritt.",
+            parse_mode="Markdown",
+            reply_markup=continue_inline(),
         )
 
         await context.bot.send_message(
@@ -401,9 +600,10 @@ async def check_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, 
             text=(
                 f"🧠 Quiz-Antwort\n\n"
                 f"Student/in: {user['name']}\n"
-                f"ID: {user_id}\n\n"
+                f"ID: {user_id}\n"
+                f"Bereich: {quiz_type}\n\n"
                 f"Frage: {q['question']}\n"
-                f"Antwort: /{answer}\n"
+                f"Antwort: {answer}\n"
                 f"Ergebnis: RICHTIG ✅\n"
                 f"Vergebene Punkte: +10\n"
                 f"Gesamtpunktzahl: {user['points']} 🏆"
@@ -412,9 +612,11 @@ async def check_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     else:
         save_data(data)
 
-        await update.message.reply_text(
+        await query.message.reply_text(
             f"Falsch ❌\n{q['explanation']}\nVergebene Punkte: 0\n\n"
-            "Senden Sie /weiter für den nächsten Schritt."
+            "Nutzen Sie *Weiter* für den nächsten Schritt.",
+            parse_mode="Markdown",
+            reply_markup=continue_inline(),
         )
 
         await context.bot.send_message(
@@ -422,151 +624,169 @@ async def check_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, 
             text=(
                 f"🧠 Quiz-Antwort\n\n"
                 f"Student/in: {user['name']}\n"
-                f"ID: {user_id}\n\n"
+                f"ID: {user_id}\n"
+                f"Bereich: {quiz_type}\n\n"
                 f"Frage: {q['question']}\n"
-                f"Antwort: /{answer}\n"
+                f"Antwort: {answer}\n"
                 f"Ergebnis: FALSCH ❌\n"
                 f"Vergebene Punkte: 0\n"
                 f"Gesamtpunktzahl: {user['points']} 🏆"
             )
         )
 
-
-async def punkte(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = load_data()
-    user_id, user = get_user(update, data)
-    await update.message.reply_text(
-        f"{user['name']}, Ihre Gesamtpunktzahl ist: {user['points']} 🏆"
-    )
-
-
-async def niveau(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = load_data()
-    user_id, user = get_user(update, data)
-    await update.message.reply_text(
-        f"{user['name']}, Ihr aktuelles Niveau ist: {get_level(user['points'])}"
-    )
-
-
-async def send_final_result(update: Update, context: ContextTypes.DEFAULT_TYPE, user: dict):
-    text = (
-        "🎉 Abschluss der Lektion\n\n"
-        "Sie haben die erste Python-Lektion erfolgreich abgeschlossen.\n\n"
-        f"Gesamtpunktzahl: {user['points']} 🏆\n"
-        f"Niveau: {get_level(user['points'])}\n\n"
-        "Senden Sie /start, wenn Sie noch einmal beginnen möchten."
-    )
-    await update.message.reply_text(text)
-
-
+# -----------------------------
+# Missionen
+# -----------------------------
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
+        return
+
+    text = update.message.text.strip()
+
+    # Reply keyboard texts
+    if text == "▶️ Weiter":
+        await go_next_step(update, context)
+        return
+    if text == "🏆 Ranking":
+        await ranking(update, context)
+        return
+    if text == "📊 Punkte":
+        await punkte(update, context)
+        return
+    if text == "📈 Niveau":
+        await niveau(update, context)
+        return
+    if text == "❓ Hilfe":
+        await hilfe(update, context)
+        return
+    if text == "🔄 Start":
+        await start(update, context)
         return
 
     data = load_data()
     user_id, user = get_user(update, data)
     step = user.get("step", "")
-
     message_text = update.message.text
     normalized = normalize_text(message_text)
 
     if step == "mission_1":
         if normalized in MISSIONS[0]["answers"]:
-            user["points"] += 15
+            user["points"] += MISSIONS[0]["points"]
             user["step"] = "mission_1_done"
             save_data(data)
 
             await update.message.reply_text(
-                "Richtig! ✅\n"
-                "Mission 1 wurde erfolgreich gelöst.\n"
-                "Sie haben +15 Punkte bekommen.\n\n"
-                "Senden Sie /weiter."
+                f"Richtig! ✅\nMission 1 wurde erfolgreich gelöst.\n"
+                f"Sie haben *+{MISSIONS[0]['points']} Punkte* bekommen.",
+                parse_mode="Markdown",
+                reply_markup=continue_inline(),
             )
 
             await context.bot.send_message(
                 chat_id=ADMIN_ID,
                 text=(
                     f"📩 Missions-Antwort\n\n"
-                    f"Student/in: {user['name']}\n"
-                    f"ID: {user_id}\n\n"
-                    f"Mission: 1\n"
-                    f"Antwort: {message_text}\n"
+                    f"Student/in: {user['name']}\nID: {user_id}\n\n"
+                    f"Mission: 1\nAntwort: {message_text}\n"
                     f"Ergebnis: RICHTIG ✅\n"
-                    f"Vergebene Punkte: +15\n"
+                    f"Vergebene Punkte: +{MISSIONS[0]['points']}\n"
                     f"Gesamtpunktzahl: {user['points']} 🏆"
                 )
             )
         else:
             await update.message.reply_text(
-                "Noch nicht richtig ❌\nBitte versuchen Sie es noch einmal."
+                "Noch nicht richtig ❌\nBitte versuchen Sie es noch einmal.",
+                reply_markup=main_menu_keyboard(),
             )
         return
 
     if step == "mission_2":
-        if normalized in MISSIONS[1]["answers"]:
-            user["points"] += 15
+        text_lower = message_text.lower()
+        sentence_count = message_text.count(".") + message_text.count("!") + message_text.count("?")
+        family_words = [
+            "vater", "mutter", "bruder", "schwester", "familie",
+            "eltern", "großvater", "großmutter", "kind", "kinder"
+        ]
+        found = any(word in text_lower for word in family_words)
+
+        if sentence_count >= 2 and found:
+            user["points"] += MISSIONS[1]["points"]
             user["step"] = "mission_2_done"
             save_data(data)
 
             await update.message.reply_text(
-                "Richtig! ✅\n"
-                "Mission 2 wurde erfolgreich gelöst.\n"
-                "Sie haben +15 Punkte bekommen.\n\n"
-                "Senden Sie /weiter."
+                f"Richtig! ✅\nMission 2 wurde erfolgreich gelöst.\n"
+                f"Sie haben *+{MISSIONS[1]['points']} Punkte* bekommen.",
+                parse_mode="Markdown",
+                reply_markup=continue_inline(),
             )
 
             await context.bot.send_message(
                 chat_id=ADMIN_ID,
                 text=(
                     f"📩 Missions-Antwort\n\n"
-                    f"Student/in: {user['name']}\n"
-                    f"ID: {user_id}\n\n"
-                    f"Mission: 2\n"
-                    f"Antwort: {message_text}\n"
+                    f"Student/in: {user['name']}\nID: {user_id}\n\n"
+                    f"Mission: 2\nAntwort: {message_text}\n"
                     f"Ergebnis: RICHTIG ✅\n"
-                    f"Vergebene Punkte: +15\n"
+                    f"Vergebene Punkte: +{MISSIONS[1]['points']}\n"
                     f"Gesamtpunktzahl: {user['points']} 🏆"
                 )
             )
         else:
             await update.message.reply_text(
-                "Noch nicht richtig ❌\nBitte versuchen Sie es noch einmal."
+                "Noch nicht richtig ❌\nBitte schreiben Sie zwei Sätze über Ihre Familie.",
+                reply_markup=main_menu_keyboard(),
             )
         return
 
     if step == "mission_3":
         if normalized in MISSIONS[2]["answers"]:
-            user["points"] += 15
+            user["points"] += MISSIONS[2]["points"]
             user["step"] = "mission_3_done"
             save_data(data)
 
             await update.message.reply_text(
-                "Richtig! ✅\n"
-                "Mission 3 wurde erfolgreich gelöst.\n"
-                "Sie haben +15 Punkte bekommen.\n\n"
-                "Senden Sie /weiter."
+                f"Richtig! ✅\nMission 3 wurde erfolgreich gelöst.\n"
+                f"Sie haben *+{MISSIONS[2]['points']} Punkte* bekommen.",
+                parse_mode="Markdown",
+                reply_markup=continue_inline(),
             )
 
             await context.bot.send_message(
                 chat_id=ADMIN_ID,
                 text=(
                     f"📩 Missions-Antwort\n\n"
-                    f"Student/in: {user['name']}\n"
-                    f"ID: {user_id}\n\n"
-                    f"Mission: 3\n"
-                    f"Antwort: {message_text}\n"
+                    f"Student/in: {user['name']}\nID: {user_id}\n\n"
+                    f"Mission: 3\nAntwort: {message_text}\n"
                     f"Ergebnis: RICHTIG ✅\n"
-                    f"Vergebene Punkte: +15\n"
+                    f"Vergebene Punkte: +{MISSIONS[2]['points']}\n"
                     f"Gesamtpunktzahl: {user['points']} 🏆"
                 )
             )
         else:
             await update.message.reply_text(
-                "Noch nicht richtig ❌\nBitte versuchen Sie es noch einmal."
+                "Noch nicht richtig ❌\nBitte versuchen Sie es noch einmal.",
+                reply_markup=main_menu_keyboard(),
             )
         return
 
+# -----------------------------
+# Abschluss
+# -----------------------------
+async def send_final_result(message_func, user: dict):
+    text = (
+        "🎉 *Abschluss der Lektion*\n\n"
+        "Sie haben die Lektion *„Die Familie“* erfolgreich abgeschlossen.\n\n"
+        f"*Gesamtpunktzahl:* {user['points']} 🏆\n"
+        f"*Niveau:* {get_level(user['points'])}\n\n"
+        "Nutzen Sie *Ranking*, um die Bestenliste zu sehen.\n"
+        "Nutzen Sie *Start*, wenn Sie die Lektion noch einmal bearbeiten möchten."
+    )
+    await message_func(text, parse_mode="Markdown", reply_markup=main_menu_keyboard())
 
+# -----------------------------
+# Main
+# -----------------------------
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
@@ -575,18 +795,15 @@ def main():
     app.add_handler(CommandHandler("hilfe", hilfe))
     app.add_handler(CommandHandler("punkte", punkte))
     app.add_handler(CommandHandler("niveau", niveau))
+    app.add_handler(CommandHandler("ranking", ranking))
 
-    app.add_handler(CommandHandler("a", answer_a))
-    app.add_handler(CommandHandler("b", answer_b))
-    app.add_handler(CommandHandler("c", answer_c))
-
+    app.add_handler(CallbackQueryHandler(handle_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     app.post_init = set_bot_commands
 
     print("Bot ist gestartet...")
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()
