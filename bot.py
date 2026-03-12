@@ -16,14 +16,14 @@ from telegram.ext import (
     filters,
 )
 
-TOKEN = os.getenv("TOKEN", "8753301957:AAFpx6qa7DoNItH80kxboa8rnVByCnithe0")
+TOKEN = os.getenv("TOKEN", "HIER_DEIN_BOTFATHER_TOKEN")
 ADMIN_ID = 6051699852
 DATA_FILE = "users.json"
 LOGO_FILE = "logo.png"
 
-# -----------------------------
-# Texte
-# -----------------------------
+# -----------------------------------
+# LEKTIONSINHALTE
+# -----------------------------------
 THEORY_TEXT = (
     "📘 *Theorie: Die Familie*\n\n"
     "Die Familie ist ein wichtiges Thema im Alltag. "
@@ -34,7 +34,7 @@ THEORY_TEXT = (
     "• Grammatik: Possessivartikel\n"
     "• Missionen\n"
     "• Quizfragen\n\n"
-    "Bitte nutzen Sie die Schaltfläche *Weiter*."
+    "Bitte klicken Sie danach auf *▶️ Weiter*."
 )
 
 VOCAB_TEXT = (
@@ -72,10 +72,11 @@ VOCAB_TEXT = (
     "zur Schule gehen — maktabga bormoq — ходить в школу\n"
     "freundlich — mehribon — дружелюбный\n"
     "der Zusammenhalt — jipslik — сплочённость\n"
+    "wichtig — muhim — важный\n"
     "mein / meine — mening — мой / моя / мои\n"
     "sein / seine — uning — его\n"
     "ihr / ihre — uning — её\n\n"
-    "Bitte nutzen Sie die Schaltfläche *Weiter*."
+    "Bitte klicken Sie danach auf *▶️ Weiter*."
 )
 
 READING_TEXT = (
@@ -92,7 +93,7 @@ READING_TEXT = (
     "In meiner Familie ist Zusammenhalt sehr wichtig.\n"
     "Wir essen oft zusammen und sprechen über unseren Tag.\n"
     "Ich liebe meine Familie sehr.\n\n"
-    "Bitte nutzen Sie die Schaltfläche *Weiter*."
+    "Bitte klicken Sie danach auf *▶️ Weiter*."
 )
 
 GRAMMAR_TEXT = (
@@ -117,7 +118,7 @@ GRAMMAR_TEXT = (
     "Das ist mein Vater.\n"
     "Das ist meine Mutter.\n"
     "Das sind meine Eltern.\n\n"
-    "Bitte nutzen Sie die Schaltfläche *Weiter*."
+    "Bitte klicken Sie danach auf *▶️ Weiter*."
 )
 
 MISSIONS = [
@@ -126,7 +127,8 @@ MISSIONS = [
         "task": (
             "✍️ *Mission 1*\n\n"
             "Lesen Sie den Text und beantworten Sie die Frage:\n\n"
-            "*Wie viele Geschwister hat die Person?*"
+            "*Wie viele Geschwister hat die Person?*\n\n"
+            "Bitte senden Sie Ihre Antwort als normales Wort oder als Zahl."
         ),
         "answers": ["zwei", "2"],
         "points": 15,
@@ -157,34 +159,134 @@ MISSIONS = [
 ]
 
 GRAMMAR_QUIZZES = [
-    {"question": "Das ist ___ Vater.", "options": {"a": "mein", "b": "meine", "c": "meinen"}, "correct": "a", "explanation": "Richtig ist: mein Vater."},
-    {"question": "Das ist ___ Mutter.", "options": {"a": "mein", "b": "meine", "c": "meiner"}, "correct": "b", "explanation": "Richtig ist: meine Mutter."},
-    {"question": "Das sind ___ Eltern.", "options": {"a": "mein", "b": "meine", "c": "meiner"}, "correct": "b", "explanation": "Richtig ist: meine Eltern."},
-    {"question": "Das ist ___ Bruder.", "options": {"a": "mein", "b": "meine", "c": "meinen"}, "correct": "a", "explanation": "Richtig ist: mein Bruder."},
-    {"question": "Das ist ___ Schwester.", "options": {"a": "mein", "b": "meine", "c": "meinen"}, "correct": "b", "explanation": "Richtig ist: meine Schwester."},
-    {"question": "„sein Vater“ bedeutet …", "options": {"a": "uning otasi", "b": "mening otam", "c": "sizning otangiz"}, "correct": "a", "explanation": "Richtig ist: uning otasi."},
-    {"question": "„ihre Mutter“ bedeutet …", "options": {"a": "uning onasi", "b": "mening onam", "c": "bizning onamiz"}, "correct": "a", "explanation": "Richtig ist: uning onasi."},
-    {"question": "Possessivartikel zeigen …", "options": {"a": "Zeit", "b": "Besitz", "c": "Ort"}, "correct": "b", "explanation": "Richtig ist: Besitz."},
-    {"question": "Das ist ___ Familie.", "options": {"a": "mein", "b": "meine", "c": "meiner"}, "correct": "b", "explanation": "Richtig ist: meine Familie."},
-    {"question": "Das ist ___ Kind.", "options": {"a": "mein", "b": "meine", "c": "meiner"}, "correct": "a", "explanation": "Richtig ist: mein Kind."},
+    {
+        "question": "Das ist ___ Vater.",
+        "options": {"a": "mein", "b": "meine", "c": "meinen"},
+        "correct": "a",
+        "explanation": "Richtig ist: *mein Vater*.",
+    },
+    {
+        "question": "Das ist ___ Mutter.",
+        "options": {"a": "mein", "b": "meine", "c": "meiner"},
+        "correct": "b",
+        "explanation": "Richtig ist: *meine Mutter*.",
+    },
+    {
+        "question": "Das sind ___ Eltern.",
+        "options": {"a": "mein", "b": "meine", "c": "meiner"},
+        "correct": "b",
+        "explanation": "Richtig ist: *meine Eltern*.",
+    },
+    {
+        "question": "Das ist ___ Bruder.",
+        "options": {"a": "mein", "b": "meine", "c": "meinen"},
+        "correct": "a",
+        "explanation": "Richtig ist: *mein Bruder*.",
+    },
+    {
+        "question": "Das ist ___ Schwester.",
+        "options": {"a": "mein", "b": "meine", "c": "meinen"},
+        "correct": "b",
+        "explanation": "Richtig ist: *meine Schwester*.",
+    },
+    {
+        "question": "„sein Vater“ bedeutet …",
+        "options": {"a": "uning otasi", "b": "mening otam", "c": "sizning otangiz"},
+        "correct": "a",
+        "explanation": "Richtig ist: *uning otasi*.",
+    },
+    {
+        "question": "„ihre Mutter“ bedeutet …",
+        "options": {"a": "uning onasi", "b": "mening onam", "c": "bizning onamiz"},
+        "correct": "a",
+        "explanation": "Richtig ist: *uning onasi*.",
+    },
+    {
+        "question": "Possessivartikel zeigen …",
+        "options": {"a": "Zeit", "b": "Besitz", "c": "Ort"},
+        "correct": "b",
+        "explanation": "Richtig ist: *Besitz*.",
+    },
+    {
+        "question": "Das ist ___ Familie.",
+        "options": {"a": "mein", "b": "meine", "c": "meiner"},
+        "correct": "b",
+        "explanation": "Richtig ist: *meine Familie*.",
+    },
+    {
+        "question": "Das ist ___ Kind.",
+        "options": {"a": "mein", "b": "meine", "c": "meiner"},
+        "correct": "a",
+        "explanation": "Richtig ist: *mein Kind*.",
+    },
 ]
 
 FAMILY_QUIZZES = [
-    {"question": "Wie sagt man „ota“ auf Deutsch?", "options": {"a": "Vater", "b": "Bruder", "c": "Sohn"}, "correct": "a", "explanation": "Richtig ist: der Vater."},
-    {"question": "Wie sagt man „ona“ auf Deutsch?", "options": {"a": "Schwester", "b": "Mutter", "c": "Tante"}, "correct": "b", "explanation": "Richtig ist: die Mutter."},
-    {"question": "Bruder bedeutet …", "options": {"a": "aka/uka", "b": "bobo", "c": "amaki"}, "correct": "a", "explanation": "Richtig ist: aka/uka."},
-    {"question": "Schwester bedeutet …", "options": {"a": "opa/singil", "b": "qiz", "c": "xola"}, "correct": "a", "explanation": "Richtig ist: opa/singil."},
-    {"question": "Eltern bedeutet …", "options": {"a": "ota-ona", "b": "bolalar", "c": "amakivachchalar"}, "correct": "a", "explanation": "Richtig ist: ota-ona."},
-    {"question": "Großvater bedeutet …", "options": {"a": "bobo", "b": "amaki", "c": "tog‘a"}, "correct": "a", "explanation": "Richtig ist: bobo."},
-    {"question": "Großmutter bedeutet …", "options": {"a": "buvi", "b": "xola", "c": "opa"}, "correct": "a", "explanation": "Richtig ist: buvi."},
-    {"question": "Cousin bedeutet …", "options": {"a": "amakivachcha", "b": "o‘g‘il", "c": "ota"}, "correct": "a", "explanation": "Richtig ist: amakivachcha."},
-    {"question": "Enkel bedeutet …", "options": {"a": "nabira", "b": "aka", "c": "ota"}, "correct": "a", "explanation": "Richtig ist: nabira."},
-    {"question": "Hochzeit bedeutet …", "options": {"a": "to‘y", "b": "tug‘ilgan kun", "c": "bayram"}, "correct": "a", "explanation": "Richtig ist: to‘y."},
+    {
+        "question": "Wie sagt man „ota“ auf Deutsch?",
+        "options": {"a": "Vater", "b": "Bruder", "c": "Sohn"},
+        "correct": "a",
+        "explanation": "Richtig ist: *der Vater*.",
+    },
+    {
+        "question": "Wie sagt man „ona“ auf Deutsch?",
+        "options": {"a": "Schwester", "b": "Mutter", "c": "Tante"},
+        "correct": "b",
+        "explanation": "Richtig ist: *die Mutter*.",
+    },
+    {
+        "question": "Bruder bedeutet …",
+        "options": {"a": "aka/uka", "b": "bobo", "c": "amaki"},
+        "correct": "a",
+        "explanation": "Richtig ist: *aka/uka*.",
+    },
+    {
+        "question": "Schwester bedeutet …",
+        "options": {"a": "opa/singil", "b": "qiz", "c": "xola"},
+        "correct": "a",
+        "explanation": "Richtig ist: *opa/singil*.",
+    },
+    {
+        "question": "Eltern bedeutet …",
+        "options": {"a": "ota-ona", "b": "bolalar", "c": "amakivachchalar"},
+        "correct": "a",
+        "explanation": "Richtig ist: *ota-ona*.",
+    },
+    {
+        "question": "Großvater bedeutet …",
+        "options": {"a": "bobo", "b": "amaki", "c": "tog‘a"},
+        "correct": "a",
+        "explanation": "Richtig ist: *bobo*.",
+    },
+    {
+        "question": "Großmutter bedeutet …",
+        "options": {"a": "buvi", "b": "xola", "c": "opa"},
+        "correct": "a",
+        "explanation": "Richtig ist: *buvi*.",
+    },
+    {
+        "question": "Cousin bedeutet …",
+        "options": {"a": "amakivachcha", "b": "o‘g‘il", "c": "ota"},
+        "correct": "a",
+        "explanation": "Richtig ist: *amakivachcha*.",
+    },
+    {
+        "question": "Enkel bedeutet …",
+        "options": {"a": "nabira", "b": "aka", "c": "ota"},
+        "correct": "a",
+        "explanation": "Richtig ist: *nabira*.",
+    },
+    {
+        "question": "Hochzeit bedeutet …",
+        "options": {"a": "to‘y", "b": "tug‘ilgan kun", "c": "bayram"},
+        "correct": "a",
+        "explanation": "Richtig ist: *to‘y*.",
+    },
 ]
 
-# -----------------------------
-# Hilfsfunktionen
-# -----------------------------
+# -----------------------------------
+# HILFSFUNKTIONEN
+# -----------------------------------
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -197,9 +299,11 @@ def save_data(data):
 
 def get_user(update: Update, data: dict):
     user_id = str(update.effective_user.id)
+    first_name = update.effective_user.first_name if update.effective_user else "Student/in"
+
     if user_id not in data:
         data[user_id] = {
-            "name": update.effective_user.first_name or "Student/in",
+            "name": first_name or "Student/in",
             "points": 0,
             "step": "start",
             "grammar_quiz_index": None,
@@ -250,15 +354,17 @@ def continue_inline():
 def quiz_inline_keyboard():
     return InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("A", callback_data="quiz:a"),
-             InlineKeyboardButton("B", callback_data="quiz:b"),
-             InlineKeyboardButton("C", callback_data="quiz:c")]
+            [
+                InlineKeyboardButton("A", callback_data="quiz:a"),
+                InlineKeyboardButton("B", callback_data="quiz:b"),
+                InlineKeyboardButton("C", callback_data="quiz:c"),
+            ]
         ]
     )
 
-# -----------------------------
-# Bot Commands
-# -----------------------------
+# -----------------------------------
+# BOT COMMANDS
+# -----------------------------------
 async def set_bot_commands(app):
     commands = [
         BotCommand("start", "Lektion starten"),
@@ -270,9 +376,9 @@ async def set_bot_commands(app):
     ]
     await app.bot.set_my_commands(commands)
 
-# -----------------------------
-# Start / Menüs
-# -----------------------------
+# -----------------------------------
+# START / MENÜ
+# -----------------------------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     _, user = get_user(update, data)
@@ -327,7 +433,7 @@ async def hilfe(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "2. Lesen Sie Theorie, Wortschatz, Text und Grammatik\n"
         "3. Lösen Sie die Missionen\n"
         "4. Beantworten Sie die Quizfragen über Buttons\n\n"
-        "*Wichtige Funktionen:*\n"
+        "*Menü:*\n"
         "• ▶️ Weiter\n"
         "• 📊 Punkte\n"
         "• 📈 Niveau\n"
@@ -387,9 +493,36 @@ async def ranking(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=main_menu_keyboard(),
     )
 
-# -----------------------------
-# Weiter-Logik
-# -----------------------------
+# -----------------------------------
+# QUIZ SENDEN
+# -----------------------------------
+async def send_grammar_quiz(message_func, index: int):
+    q = GRAMMAR_QUIZZES[index]
+    text = (
+        f"🧠 *Grammatik-Quiz {index + 1}*\n\n"
+        f"{q['question']}\n\n"
+        f"A) {q['options']['a']}\n"
+        f"B) {q['options']['b']}\n"
+        f"C) {q['options']['c']}\n\n"
+        "Bitte wählen Sie eine Antwort:"
+    )
+    await message_func(text, parse_mode="Markdown", reply_markup=quiz_inline_keyboard())
+
+async def send_family_quiz(message_func, index: int):
+    q = FAMILY_QUIZZES[index]
+    text = (
+        f"👨‍👩‍👧‍👦 *Familie-Quiz {index + 1}*\n\n"
+        f"{q['question']}\n\n"
+        f"A) {q['options']['a']}\n"
+        f"B) {q['options']['b']}\n"
+        f"C) {q['options']['c']}\n\n"
+        "Bitte wählen Sie eine Antwort:"
+    )
+    await message_func(text, parse_mode="Markdown", reply_markup=quiz_inline_keyboard())
+
+# -----------------------------------
+# WEITER-LOGIK
+# -----------------------------------
 async def weiter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await go_next_step(update, context)
 
@@ -499,62 +632,46 @@ async def go_next_step(update_or_query, context: ContextTypes.DEFAULT_TYPE):
     if step == "done":
         await message_func(
             "Sie haben diese Lektion bereits abgeschlossen. 🎉\n"
-            "Drücken Sie *Start*, wenn Sie noch einmal beginnen möchten.",
+            "Drücken Sie *🔄 Start*, wenn Sie noch einmal beginnen möchten.",
             parse_mode="Markdown",
             reply_markup=main_menu_keyboard(),
         )
         return
 
-    await message_func("Bitte starten Sie zuerst mit *Start*.", parse_mode="Markdown", reply_markup=main_menu_keyboard())
-
-# -----------------------------
-# Quiz senden
-# -----------------------------
-async def send_grammar_quiz(message_func, index: int):
-    q = GRAMMAR_QUIZZES[index]
-    text = (
-        f"🧠 *Grammatik-Quiz {index + 1}*\n\n"
-        f"{q['question']}\n\n"
-        f"A) {q['options']['a']}\n"
-        f"B) {q['options']['b']}\n"
-        f"C) {q['options']['c']}"
+    await message_func(
+        "Bitte starten Sie zuerst mit *🔄 Start*.",
+        parse_mode="Markdown",
+        reply_markup=main_menu_keyboard(),
     )
-    await message_func(text, parse_mode="Markdown", reply_markup=quiz_inline_keyboard())
 
-async def send_family_quiz(message_func, index: int):
-    q = FAMILY_QUIZZES[index]
-    text = (
-        f"👨‍👩‍👧‍👦 *Thema-Familie-Quiz {index + 1}*\n\n"
-        f"{q['question']}\n\n"
-        f"A) {q['options']['a']}\n"
-        f"B) {q['options']['b']}\n"
-        f"C) {q['options']['c']}"
-    )
-    await message_func(text, parse_mode="Markdown", reply_markup=quiz_inline_keyboard())
-
-# -----------------------------
-# Callback Buttons
-# -----------------------------
+# -----------------------------------
+# CALLBACK BUTTONS
+# -----------------------------------
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    data_str = query.data
+    callback_data = query.data
 
-    if data_str == "continue":
+    if callback_data == "continue":
         await go_next_step(query, context)
         return
 
-    if data_str.startswith("quiz:"):
-        answer = data_str.split(":")[1]
+    if callback_data.startswith("quiz:"):
+        answer = callback_data.split(":")[1]
         await check_quiz_answer(query, context, answer)
         return
 
 async def check_quiz_answer(query, context: ContextTypes.DEFAULT_TYPE, answer: str):
     data = load_data()
     user_id = str(query.from_user.id)
+
     if user_id not in data:
-        await query.message.reply_text("Bitte starten Sie zuerst mit *Start*.", parse_mode="Markdown")
+        await query.message.reply_text(
+            "Bitte starten Sie zuerst mit *🔄 Start*.",
+            parse_mode="Markdown",
+            reply_markup=main_menu_keyboard(),
+        )
         return
 
     user = data[user_id]
@@ -563,7 +680,7 @@ async def check_quiz_answer(query, context: ContextTypes.DEFAULT_TYPE, answer: s
     if step.startswith("grammar_quiz_"):
         idx = user.get("grammar_quiz_index")
         if idx is None:
-            await query.message.reply_text("Bitte nutzen Sie *Weiter*.", parse_mode="Markdown")
+            await query.message.reply_text("Bitte nutzen Sie *▶️ Weiter*.", parse_mode="Markdown")
             return
         q = GRAMMAR_QUIZZES[idx]
         quiz_type = "Grammatik"
@@ -571,14 +688,14 @@ async def check_quiz_answer(query, context: ContextTypes.DEFAULT_TYPE, answer: s
     elif step.startswith("family_quiz_"):
         idx = user.get("family_quiz_index")
         if idx is None:
-            await query.message.reply_text("Bitte nutzen Sie *Weiter*.", parse_mode="Markdown")
+            await query.message.reply_text("Bitte nutzen Sie *▶️ Weiter*.", parse_mode="Markdown")
             return
         q = FAMILY_QUIZZES[idx]
         quiz_type = "Familie"
 
     else:
         await query.message.reply_text(
-            "Im Moment ist kein Quiz aktiv.\nBitte nutzen Sie *Weiter*.",
+            "Im Moment ist kein Quiz aktiv.\nBitte nutzen Sie *▶️ Weiter*.",
             parse_mode="Markdown",
             reply_markup=main_menu_keyboard(),
         )
@@ -590,7 +707,7 @@ async def check_quiz_answer(query, context: ContextTypes.DEFAULT_TYPE, answer: s
 
         await query.message.reply_text(
             f"Richtig! ✅\n{q['explanation']}\nSie haben *+10 Punkte* bekommen.\n\n"
-            "Nutzen Sie *Weiter* für den nächsten Schritt.",
+            "Bitte klicken Sie auf *▶️ Weiter*.",
             parse_mode="Markdown",
             reply_markup=continue_inline(),
         )
@@ -614,7 +731,7 @@ async def check_quiz_answer(query, context: ContextTypes.DEFAULT_TYPE, answer: s
 
         await query.message.reply_text(
             f"Falsch ❌\n{q['explanation']}\nVergebene Punkte: 0\n\n"
-            "Nutzen Sie *Weiter* für den nächsten Schritt.",
+            "Bitte klicken Sie auf *▶️ Weiter*.",
             parse_mode="Markdown",
             reply_markup=continue_inline(),
         )
@@ -634,16 +751,16 @@ async def check_quiz_answer(query, context: ContextTypes.DEFAULT_TYPE, answer: s
             )
         )
 
-# -----------------------------
-# Missionen
-# -----------------------------
+# -----------------------------------
+# MISSIONEN
+# -----------------------------------
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
         return
 
     text = update.message.text.strip()
 
-    # Reply keyboard texts
+    # Menü-Tasten
     if text == "▶️ Weiter":
         await go_next_step(update, context)
         return
@@ -686,8 +803,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 chat_id=ADMIN_ID,
                 text=(
                     f"📩 Missions-Antwort\n\n"
-                    f"Student/in: {user['name']}\nID: {user_id}\n\n"
-                    f"Mission: 1\nAntwort: {message_text}\n"
+                    f"Student/in: {user['name']}\n"
+                    f"ID: {user_id}\n\n"
+                    f"Mission: 1\n"
+                    f"Antwort: {message_text}\n"
                     f"Ergebnis: RICHTIG ✅\n"
                     f"Vergebene Punkte: +{MISSIONS[0]['points']}\n"
                     f"Gesamtpunktzahl: {user['points']} 🏆"
@@ -705,7 +824,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         sentence_count = message_text.count(".") + message_text.count("!") + message_text.count("?")
         family_words = [
             "vater", "mutter", "bruder", "schwester", "familie",
-            "eltern", "großvater", "großmutter", "kind", "kinder"
+            "eltern", "großvater", "großmutter", "kind", "kinder",
+            "onkel", "tante", "cousin", "cousine"
         ]
         found = any(word in text_lower for word in family_words)
 
@@ -725,8 +845,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 chat_id=ADMIN_ID,
                 text=(
                     f"📩 Missions-Antwort\n\n"
-                    f"Student/in: {user['name']}\nID: {user_id}\n\n"
-                    f"Mission: 2\nAntwort: {message_text}\n"
+                    f"Student/in: {user['name']}\n"
+                    f"ID: {user_id}\n\n"
+                    f"Mission: 2\n"
+                    f"Antwort: {message_text}\n"
                     f"Ergebnis: RICHTIG ✅\n"
                     f"Vergebene Punkte: +{MISSIONS[1]['points']}\n"
                     f"Gesamtpunktzahl: {user['points']} 🏆"
@@ -756,8 +878,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 chat_id=ADMIN_ID,
                 text=(
                     f"📩 Missions-Antwort\n\n"
-                    f"Student/in: {user['name']}\nID: {user_id}\n\n"
-                    f"Mission: 3\nAntwort: {message_text}\n"
+                    f"Student/in: {user['name']}\n"
+                    f"ID: {user_id}\n\n"
+                    f"Mission: 3\n"
+                    f"Antwort: {message_text}\n"
                     f"Ergebnis: RICHTIG ✅\n"
                     f"Vergebene Punkte: +{MISSIONS[2]['points']}\n"
                     f"Gesamtpunktzahl: {user['points']} 🏆"
@@ -770,23 +894,27 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         return
 
-# -----------------------------
-# Abschluss
-# -----------------------------
+# -----------------------------------
+# ABSCHLUSS
+# -----------------------------------
 async def send_final_result(message_func, user: dict):
     text = (
         "🎉 *Abschluss der Lektion*\n\n"
         "Sie haben die Lektion *„Die Familie“* erfolgreich abgeschlossen.\n\n"
         f"*Gesamtpunktzahl:* {user['points']} 🏆\n"
         f"*Niveau:* {get_level(user['points'])}\n\n"
-        "Nutzen Sie *Ranking*, um die Bestenliste zu sehen.\n"
-        "Nutzen Sie *Start*, wenn Sie die Lektion noch einmal bearbeiten möchten."
+        "Nutzen Sie *🏆 Ranking*, um die Bestenliste zu sehen.\n"
+        "Nutzen Sie *🔄 Start*, wenn Sie die Lektion noch einmal bearbeiten möchten."
     )
-    await message_func(text, parse_mode="Markdown", reply_markup=main_menu_keyboard())
+    await message_func(
+        text,
+        parse_mode="Markdown",
+        reply_markup=main_menu_keyboard(),
+    )
 
-# -----------------------------
-# Main
-# -----------------------------
+# -----------------------------------
+# MAIN
+# -----------------------------------
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
